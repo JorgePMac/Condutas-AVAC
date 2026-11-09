@@ -1,0 +1,971 @@
+<!doctype html>
+<html lang="pt-PT">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="theme-color" content="#1F3864">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/icon-192.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Condutas AVAC">
+<title>Condutas AVAC — Dimensionamento</title>
+<style>
+:root{--navy:#1F3864;--org:#ED7D31;--bg:#eef1f6;--card:#fff;--line:#d5dbe7;--txt:#1b2433;--mut:#5b6678;--red:#C00000;--blue:#DDEBF7;--crit:#FCE4D6}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:Arial,Helvetica,sans-serif;color:var(--txt);background:var(--bg);font-size:15px}
+button,select,input,textarea{font:inherit;color:inherit}
+#app{display:flex;flex-direction:column;height:100%}
+header{background:var(--navy);color:#fff;display:flex;align-items:center;gap:10px;padding:6px 12px;flex-wrap:wrap}
+header .t{font-weight:bold;font-size:17px;white-space:nowrap}
+header .eq{font-size:12px;opacity:.85}
+header select{background:#fff;color:#1b2433;border:0;border-radius:6px;padding:7px 8px;min-height:38px;max-width:180px}
+nav{display:flex;gap:4px;margin-left:auto}
+nav button,.btn{background:#2d4a82;color:#fff;border:0;border-radius:8px;padding:9px 14px;min-height:40px;cursor:pointer}
+nav button.on{background:#fff;color:var(--navy);font-weight:bold}
+.btn.ghost{background:#fff;color:var(--navy);border:1px solid var(--line)}
+.btn.org{background:var(--org)}
+.btn.red{background:var(--red)}
+.btn.sm{padding:6px 10px;min-height:32px;font-size:13px}
+main{flex:1;min-height:0;overflow:hidden;position:relative}
+.view{position:absolute;inset:0;overflow:auto;padding:10px;display:none}
+.view.on{display:block}
+#v-rede.on{display:flex;gap:10px;flex-direction:column}
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:8px;flex:none}
+.k{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--navy);border-radius:8px;padding:6px 10px;min-width:0}
+.k.e{border-left-color:var(--org)}.k.e b{color:var(--org)}
+.k span{display:block;font-size:10px;color:var(--mut);text-transform:uppercase}
+.k b{font-size:21px;color:var(--navy)}.k i{font-style:normal;font-size:11px;color:var(--mut)}
+.split{display:flex;gap:10px;flex:1;min-height:0}
+.pane{background:var(--card);border:1px solid var(--line);border-radius:10px;overflow:auto;min-height:0}
+#tree{flex:0 0 42%;display:flex;flex-direction:column}
+#treeList{flex:1;overflow:auto}
+#edit{flex:1;padding:10px 14px}
+.trow{display:flex;align-items:center;gap:6px;padding:7px 8px;border-bottom:1px solid #edf0f5;cursor:pointer;min-height:46px}
+.trow.sel{background:#e3ecfb;outline:2px solid var(--navy);outline-offset:-2px}
+.trow.crit .nm{color:#b4530c;font-weight:bold}
+.trow .id{font-weight:bold;min-width:28px}
+.trow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trow .r{font-size:12px;color:var(--mut);text-align:right;white-space:nowrap}
+.trow .al{color:var(--red);font-weight:bold}
+.trow .er{color:#fff;background:var(--red);border-radius:4px;padding:1px 5px;font-size:11px}
+.tb{display:flex;gap:6px;padding:8px;border-top:1px solid var(--line);flex-wrap:wrap;background:#f8f9fc}
+h3{margin:10px 0 6px;font-size:12px;text-transform:uppercase;color:var(--navy);border-bottom:2px solid var(--navy);padding-bottom:3px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+label.f{display:block;font-size:11px;color:var(--mut)}
+label.f input,label.f select{display:block;width:100%;margin-top:2px;padding:8px;border:1px solid #b9c3d6;border-radius:6px;background:#fffbe6;min-height:38px;color:#0000cc}
+label.f select{background:#fffbe6}
+label.f input[readonly]{background:#f1f3f7;color:var(--txt)}
+.step{display:flex;align-items:center;gap:4px;margin-top:2px}
+.step button{width:40px;height:38px;border:1px solid #b9c3d6;border-radius:6px;background:#fff;font-size:20px}
+.step span{min-width:26px;text-align:center;font-weight:bold;font-size:16px}
+.res{background:#f4f7fc;border:1px solid var(--line);border-radius:8px;padding:8px;margin-top:8px;display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:6px}
+.res div span{display:block;font-size:10px;color:var(--mut);text-transform:uppercase}.res div b{font-size:15px}
+.bad{color:var(--red)}
+table.t{border-collapse:collapse;width:100%;font-size:13px}
+table.t th{background:var(--navy);color:#fff;font-weight:normal;padding:5px;font-size:11px}
+table.t td{border-bottom:1px solid #e6eaf2;padding:3px 5px;text-align:center}
+table.t td input,table.t td select{width:100%;border:1px solid #c4cde0;border-radius:4px;padding:5px;background:#fffbe6;color:#0000cc;min-height:30px}
+table.t td.l{text-align:left}
+.cmp td,.cmp th{padding:4px 6px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:12px}
+.hint{font-size:12px;color:var(--mut)}
+#schemaWrap{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px;overflow:auto;height:100%}
+.node{cursor:pointer}
+/* ---- folha A4 ---- */
+#pageHost{transform-origin:top left}
+.page{width:297mm;height:210mm;background:#fff;padding:6mm 9mm;position:relative;overflow:hidden;margin:0 0 10px 0;box-shadow:0 1px 6px #0003;font-size:8pt;page-break-after:always;break-after:page}
+.page *{font-family:Arial,Helvetica,sans-serif}
+.ban{background:var(--navy);color:#fff;display:grid;grid-template-columns:1fr 90mm;padding:2mm 4mm;border-radius:1mm}
+.ban small{font-size:6pt;color:#b4c7e7;font-weight:bold;letter-spacing:.5px}
+.ban .big{font-size:20pt;font-weight:bold;line-height:1.15}
+.ban .sv{font-size:8.5pt;color:#ddebf7}
+.ban .meta{font-size:7.5pt;display:grid;grid-template-columns:auto 1fr;gap:.6mm 3mm;align-content:center}
+.ban .meta i{font-style:normal;color:#b4c7e7;font-size:6.2pt;font-weight:bold}
+.ttl{display:flex;align-items:center;justify-content:space-between;margin:1.5mm 0}
+.ttl h1{margin:0;font-size:12pt;color:var(--navy)}
+.pk{display:grid;grid-template-columns:repeat(6,1fr);gap:2mm;margin:1.5mm 0}
+.pk div{border-left:1.2mm solid var(--navy);background:#f7f9fc;padding:1mm 2mm;border-top:.2mm solid #d5dbe7;border-bottom:.2mm solid #d5dbe7}
+.pk div.e{border-left-color:var(--org)}.pk div.e b{color:var(--org)}
+.pk span{display:block;font-size:5.6pt;color:#555;font-weight:bold;text-transform:uppercase}.pk b{font-size:14pt;color:var(--navy)}.pk i{font-style:normal;font-size:6pt;color:#555;display:block}
+.sec{font-size:7pt;font-weight:bold;color:var(--navy);border-bottom:.3mm solid var(--navy);margin:1.5mm 0 1mm;text-transform:uppercase;padding-bottom:.6mm}
+.two{display:grid;grid-template-columns:1fr 80mm;gap:5mm}
+.crit-l{display:grid;grid-template-columns:1fr auto;gap:0 3mm;font-size:7pt}
+.crit-l div{border-bottom:.15mm solid #bbb;padding:.9mm 0}.crit-l div:nth-child(even){text-align:right;font-weight:bold}
+.pt{width:100%;border-collapse:collapse;font-size:6.6pt}
+.pt th{background:var(--navy);color:#fff;font-weight:normal;padding:.9mm;font-size:6pt}
+.pt td{border-bottom:.15mm solid #bbb;padding:.35mm 1mm;text-align:center}
+.pt td.l{text-align:left}.pt tr.c td{background:#FCE4D6}.pt td.w{color:var(--red);font-weight:bold}
+.pf{position:absolute;left:9mm;right:9mm;bottom:2.5mm;font-size:6pt;color:#666;display:flex;justify-content:space-between}
+
+.cover{display:grid;grid-template-columns:250px 1fr;height:100%;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:#fff}
+.cv-menu{background:#16294d;color:#fff;padding:18px 14px;display:flex;flex-direction:column;gap:6px}
+.cv-menu h2{margin:0 0 10px;font-size:20px;font-weight:normal}
+.cv-menu button{background:transparent;color:#fff;border:0;text-align:left;padding:12px 12px;border-radius:8px;font-size:15px;min-height:44px;cursor:pointer;border-left:4px solid transparent}
+.cv-menu button:hover,.cv-menu button:active{background:#2d4a82}
+.cv-menu button.go{background:var(--org);font-weight:bold;margin-bottom:10px;border-left-color:transparent}
+.cv-menu hr{border:0;border-top:1px solid #ffffff30;margin:8px 0;width:100%}
+.cv-menu .hint{color:#b4c7e7;margin-top:auto}
+.cv-main{display:flex;flex-direction:column;min-width:0;overflow:auto}
+.cv-hero{position:relative;flex:none;height:42%;min-height:190px;background:#1F3864}
+.cv-hero svg{width:100%;height:100%;display:block}
+.cv-body{padding:16px 26px;display:grid;grid-template-columns:190px 1fr;gap:22px;align-items:start}
+.logo-slot{width:190px;height:100px;border:2px dashed #b9c3d6;border-radius:10px;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--mut);font-size:12px;cursor:pointer;background:#f7f9fc;overflow:hidden;padding:6px}
+.logo-slot img{max-width:100%;max-height:100%;object-fit:contain}
+.cv-title>input{width:100%;border:0;border-bottom:2px solid var(--navy);font-size:26px;font-weight:bold;color:var(--navy);padding:4px 0;background:transparent;outline:0}
+.cv-title>input.sub{font-size:15px;font-weight:normal;color:var(--mut);border-bottom:1px solid var(--line);margin-top:6px}
+.cv-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:8px;margin-top:12px}
+@media (max-width:760px){.cover{grid-template-columns:1fr;height:auto}.cv-body{grid-template-columns:1fr}}
+@media print{
+ @page{size:297mm 210mm;margin:0}
+ html,body{background:#fff;height:auto}
+ #app>header,#app>main>.view:not(#v-resumo),.noprint{display:none!important}
+ #app,main{display:block;height:auto;overflow:visible}
+ #v-resumo{position:static!important;display:block!important;overflow:visible;padding:0}
+ #pageHost{transform:none!important;width:auto!important;height:auto!important}
+ .page{margin:0;box-shadow:none}
+}
+@media (max-width:900px){.kpis{grid-template-columns:repeat(3,1fr)}.split{flex-direction:column}#tree{flex:none;max-height:45%}}
+.modal{position:fixed;inset:0;background:#0007;display:none;align-items:center;justify-content:center;z-index:10}
+.modal.on{display:flex}.modal>div{background:#fff;border-radius:12px;padding:16px;max-width:560px;width:92%;max-height:86%;overflow:auto}
+</style>
+</head>
+<body>
+<div id="app">
+<header>
+  <div><div class="t">Condutas AVAC</div><div class="eq" id="hdrEq"></div></div>
+  <select id="selCirc" class="ctl" title="Circuito"></select>
+  <select id="selMet" class="ctl" title="Método global"></select>
+  <nav id="nav"></nav>
+</header>
+<main>
+  <section class="view on" id="v-ficheiro"></section>
+  <section class="view" id="v-rede">
+    <div class="kpis" id="kpis"></div>
+    <div class="split">
+      <div class="pane" id="tree"><div id="treeList"></div><div class="tb" id="treeTb"></div></div>
+      <div class="pane" id="edit"></div>
+    </div>
+  </section>
+  <section class="view" id="v-esquema"><div id="schemaWrap"></div></section>
+  <section class="view" id="v-resumo">
+    <div class="noprint" style="display:flex;gap:8px;margin-bottom:8px;align-items:center"><button class="btn org" id="btnPrint">🖨 Imprimir / Guardar PDF</button><span class="hint">A4 horizontal. No diálogo de impressão escolha «Guardar como PDF», margens «Nenhuma» e desligue «Cabeçalhos e rodapés».</span></div>
+    <div id="pageHost"></div>
+  </section>
+  <section class="view" id="v-def"></section>
+</main>
+</div>
+<div class="modal" id="dlgNovo"><div></div></div>
+<input type="file" id="fileIn" accept=".json,.csv,text/csv,application/json" style="display:none">
+<input type="file" id="logoIn" accept="image/*" style="display:none">
+
+<script>/* Motor de cálculo de condutas AVAC — port do modelo validado (Python) da folha R4.
+   Sem dependências. Usado no navegador (window.Engine) e em Node (module.exports). */
+(function (root) {
+  "use strict";
+  const METODOS = ["Perda const.", "Velocidade", "Rec. estática", "Pressões eq."];
+  const CODE = { "Perda const.": "PC", "Velocidade": "VL", "Rec. estática": "RE", "Pressões eq.": "PE" };
+
+  function haal(re, eps, d) {
+    if (re < 2300) return 64 / re;
+    const x = Math.pow((eps / 1000) / d / 3.7, 1.11) + 6.9 / re;
+    const l = -1.8 * Math.log10(x);
+    return 1 / (l * l);
+  }
+  const huebscher = (a, b) => 1.3 * Math.pow(a * b, 0.625) / Math.pow(a + b, 0.25);
+  const isNum = (x) => typeof x === "number" && isFinite(x);
+  const N = (x) => (isNum(x) ? x : 0);
+
+  class Engine {
+    constructor(data) {
+      this.d = data;
+      const p = (this.p = data.params);
+      this.rho = p.rho; this.nu = p.visc;
+      this.cat = {}; (data.catalogo || []).forEach((c) => (this.cat[c.cod] = c));
+      this.mat = {}; (data.materiais || []).forEach((m) => (this.mat[m.nome] = m.eps));
+      this.crit = {}; (data.criterios || []).forEach((c) => (this.crit[c.nome] = c));
+      this.TAB = (data.diametros || []).map(Number).filter((x) => x > 0).sort((a, b) => a - b);
+      this.W = []; for (let i = 0; i < 60; i++) this.W.push(p.ladoMin + i * p.modulo);
+      const der = (data.derivacoes || []).filter((r) => isNum(r.q) && isNum(r.c));
+      // linhas contíguas a partir do início (como a folha: sem linhas vazias)
+      this.der = [];
+      for (const r of data.derivacoes || []) { if (isNum(r.q) && isNum(r.c)) this.der.push([r.q, r.c]); else break; }
+      let ok = this.der.length >= 2; for (let i = 1; i < this.der.length; i++) if (this.der[i][0] <= this.der[i - 1][0]) ok = false;
+      this.derOn = ok;
+      this.prepare();
+    }
+
+    cval(code) { const c = this.cat[code]; return c ? N(c.valor) : 0; }
+
+    prepare() {
+      const d = this.d, p = this.p;
+      const rows = d.trechos;
+      this.errors = {};
+      const byId = new Map(); const cnt = {};
+      rows.forEach((t) => { cnt[t.id] = (cnt[t.id] || 0) + 1; if (!byId.has(t.id)) byId.set(t.id, t); });
+      this.byId = byId;
+      const circNames = (d.circuitos || []).map((c) => c.nome).filter(Boolean);
+      this.circNames = circNames;
+      // filhos (todas as linhas), folhas
+      const kids = new Map(); rows.forEach((t) => kids.set(t.id, []));
+      rows.forEach((t) => { if (t.mont !== 0 && kids.has(t.mont)) kids.get(t.mont).push(t); });
+      this.kids = kids;
+      // caudais (de baixo para cima; evita ciclos)
+      const q = new Map();
+      const calcQ = (t, seen) => {
+        if (q.has(t.id)) return q.get(t.id);
+        if (seen.has(t.id)) return 0;
+        seen.add(t.id);
+        const ks = kids.get(t.id) || [];
+        const v = ks.length === 0 ? N(t.qterm) : ks.reduce((s, c) => s + calcQ(c, seen), 0);
+        q.set(t.id, v); return v;
+      };
+      rows.forEach((t) => calcQ(t, new Set()));
+      // ordem topológica a partir das raízes (validade do montante)
+      const order = []; const seen = new Set();
+      const walk = (t) => { if (seen.has(t.id)) return; seen.add(t.id); order.push(t); (kids.get(t.id) || []).forEach(walk); };
+      rows.filter((t) => t.mont === 0).forEach(walk);
+      this.reached = seen;
+      const bad = new Set();
+      this.tr = [];
+      rows.forEach((t) => {
+        let e = "";
+        const leaf = (kids.get(t.id) || []).length === 0;
+        const par = t.mont === 0 ? null : byId.get(t.mont);
+        const catEff = leaf ? "Terminal" : t.cat;
+        const eps = this.mat[t.mat];
+        const cr = this.crit[p.espaco];
+        if (t.id === "" || t.id == null || !isNum(Number(t.id))) e = "ID inválido";
+        else if (cnt[t.id] > 1) e = "ID duplicado";
+        else if (!circNames.includes(t.circ)) e = "Circuito inválido";
+        else if (t.mont !== 0 && (!par || !seen.has(t.id))) e = "Montante inválido";
+        else if (par && par.circ !== t.circ) e = "Circuito ≠ montante";
+        else if (eps === undefined) e = "Material inválido";
+        else if (!leaf && t.cat !== "Tronco" && t.cat !== "Ramal") e = "Categoria inválida";
+        else if (!(q.get(t.id) > 0)) e = "Sem caudal";
+        else if (!isNum(t.len)) e = "Sem comprimento";
+        else if (t.forma === "Retangular" && N(t.manA) > 0 && !(N(t.manB) > 0)) e = "Lado B manual em falta";
+        else if (!cr) e = "Tipo de espaço inválido";
+        if (e) bad.add(t.id);
+        const o = { src: t, id: t.id, mont: t.mont, circ: t.circ, leaf, cat: t.cat, catEff, q: q.get(t.id) || 0, err: e, ok: !e };
+        this.tr.push(o);
+        if (e) this.errors[t.id] = e;
+      });
+      // propagar: descendente de inválido por montante inválido (já tratado via seen/par)
+      this.idx = new Map(this.tr.map((o, i) => [o.id, o]));
+      // ordem de cálculo = topológica restrita a válidos
+      this.ord = order.map((t) => this.idx.get(t.id)).filter((o) => o && o.ok && (o.mont === 0 || (this.idx.get(o.mont) && this.idx.get(o.mont).ok)));
+      const okSet = new Set(this.ord.map((o) => o.id));
+      this.ord.forEach((o) => { if (o.mont !== 0 && !okSet.has(o.mont)) { o.ok = false; o.err = "Montante inválido"; this.errors[o.id] = o.err; } });
+      this.ord = this.ord.filter((o) => o.ok);
+      this.children = new Map(); this.ord.forEach((o) => this.children.set(o.id, []));
+      this.ord.forEach((o) => { if (o.mont !== 0 && this.children.has(o.mont)) this.children.get(o.mont).push(o.id); });
+      const lim = this.crit[p.espaco];
+      this.ord.forEach((o) => {
+        const t = o.src;
+        o.qs = o.q / 3600; o.len = t.len; o.eps = this.mat[t.mat];
+        o.geo = t.forma === "Retangular" ? "Retangular" : "Circular";
+        o.vlim = o.catEff === "Tronco" ? lim.tronco : o.catEff === "Ramal" ? lim.ramal : lim.term;
+        o.hfix = N(t.hfix); o.kasp = N(t.kasp) >= 1 ? t.kasp : p.kAlvo;
+        o.man = N(t.manA) > 0 ? (o.geo === "Retangular" ? (N(t.manB) > 0 ? [t.manA, t.manB] : null) : [t.manA, null]) : null;
+        const qk = (this.d.quick || []);
+        let sc = 0, scu = 0, fix = 0, fixu = 0;
+        const addPiece = (cod, qtd, valor, ambito) => {
+          const c = this.cat[cod]; if (!c || !(qtd > 0)) return;
+          const val = (valor !== "" && valor != null && isNum(Number(valor))) ? Number(valor) : N(c.valor);
+          const amb = ambito || c.ambito || "Rede";
+          if (c.tipo === "C") { sc += qtd * val; if (amb === "UTA") scu += qtd * val; }
+          else { fix += qtd * val; if (amb === "UTA") fixu += qtd * val; }
+        };
+        (t.pecas || []).forEach((pc) => addPiece(pc.cod, N(pc.qtd), pc.valor, pc.ambito));
+        // peças rápidas
+        o.nder = (this.derOn && N(t.nte) > 0 && t.mont !== 0) ? N(t.nte) : 0;
+        sc += N(t.n90) * this.cval(qk[0]) + N(t.n45) * this.cval(qk[1]) + (N(t.nte) - o.nder) * this.cval(qk[2]) + N(t.nred) * this.cval(qk[3]) + N(t.nreg) * this.cval(qk[4]);
+        // terminal / equipamento
+        if (t.term) {
+          const c = this.cat[t.term];
+          if (c) {
+            if (c.tipo === "C") sc += N(c.valor);
+            else {
+              const qn = N(c.qnom), ex = N(c.exp) > 0 ? N(c.exp) : 2;
+              fix += N(c.valor) * (qn > 0 ? Math.pow(o.q / qn, ex) : 1);
+            }
+          }
+        }
+        o.sc = sc; o.scu = scu; o.fix = fix; o.fixu = fixu;
+      });
+      // Δp/m de referência por circuito
+      this.rref = {};
+      (d.circuitos || []).forEach((c) => {
+        if (!c.nome) return;
+        const mine = this.ord.filter((o) => o.circ === c.nome);
+        if (!mine.length) return;
+        const q0 = mine.filter((o) => o.mont === 0).reduce((s, o) => s + o.q, 0);
+        const d0 = Math.sqrt(4 * (q0 / 3600) / (Math.PI * p.vini));
+        const re0 = p.vini * d0 / this.nu;
+        const eps0 = mine[0].eps;
+        const derived = haal(re0, eps0, d0) / d0 * this.rho / 2 * p.vini * p.vini;
+        this.rref[c.nome] = N(c.refIn) > 0 ? c.refIn : derived;
+        c._q0 = q0; c._d0 = d0 * 1000; c._re0 = re0; c._eps0 = eps0; c._ref = this.rref[c.nome];
+      });
+      this._cache = {};
+    }
+
+    swamee(o) {
+      const g = this.rref[o.circ] / this.rho, q = o.qs, nu = this.nu;
+      return 1000 * 0.66 * Math.pow(Math.pow(o.eps / 1000, 1.25) * Math.pow(q * q / g, 4.75) + nu * Math.pow(q, 9.4) * Math.pow(1 / g, 5.2), 0.04);
+    }
+    roundD(dd, up) {
+      const T = this.TAB;
+      if (up) {
+        const n = T.filter((x) => x < dd - 0.5).length;
+        return T[Math.min(n, T.length - 1)];
+      }
+      const n = T.filter((x) => x <= dd).length;
+      const lo = T[Math.max(1, n) - 1], hi = T[Math.min(T.length, n + 1) - 1];
+      return dd - lo <= hi - dd ? lo : hi;
+    }
+    rectFrom(o, dt, at) {
+      const m = this.p.modulo, lm = this.p.ladoMin, W = this.W;
+      const ru = (x) => Math.ceil(Number((x / m).toFixed(6))) * m;
+      const hf = o.hfix, k = o.kasp;
+      let a, b;
+      if (hf > 0) {
+        a = hf;
+        if (dt != null) { const n = W.filter((w) => huebscher(hf, w) < dt).length; b = W[Math.min(60, n + 1) - 1]; }
+        else b = Math.max(lm, ru(at * 1e6 / hf));
+      } else if (dt != null) {
+        const ax = dt / (1.3 * Math.pow(k, 0.625) / Math.pow(1 + k, 0.25));
+        a = Math.max(lm, ru(ax)); b = Math.max(lm, ru(k * ax));
+      } else {
+        const ax = Math.sqrt(at * 1e6 / k);
+        a = Math.max(lm, ru(ax)); b = Math.max(lm, ru(at * 1e6 / a));
+      }
+      return [a, b];
+    }
+    cder(o) {
+      if (!o.nder) return 0;
+      const par = this.idx.get(o.mont);
+      const x = Math.max(0, Math.min(o.qs / par.qs, 1));
+      const xs = this.der.map((r) => r[0]), cs = this.der.map((r) => r[1]);
+      if (x <= xs[0]) return cs[0];
+      if (x >= xs[xs.length - 1]) return cs[cs.length - 1];
+      for (let k = 0; k < xs.length - 1; k++) if (xs[k] <= x && x < xs[k + 1]) return cs[k] + (cs[k + 1] - cs[k]) * (x - xs[k]) / (xs[k + 1] - xs[k]);
+      return 0;
+    }
+    tee(o, par) { return o.nder && par ? o.nder * this.cder(o) * this.rho / 2 * par.v * par.v : 0; }
+    lossCirc(o, dmm) {
+      const dm = dmm / 1000, v = 4 * o.qs / (Math.PI * dm * dm), re = v * dm / this.nu, lam = haal(re, o.eps, dm);
+      return lam / dm * this.rho / 2 * v * v * o.len + o.sc * this.rho / 2 * v * v;
+    }
+    solveLeafPE(o, pav, tee) {
+      const dvl = Math.sqrt(4 * o.qs / (Math.PI * o.vlim * this.p.fatorV)) * 1000;
+      const target = pav - o.fix - tee;
+      let lo = 20, hi = 5000;
+      if (target <= 0.001) return Math.min(hi, dvl);
+      for (let i = 0; i < 200; i++) { const mid = (lo + hi) / 2; if (this.lossCirc(o, mid) > target) lo = mid; else hi = mid; }
+      return Math.max(dvl, (lo + hi) / 2);
+    }
+
+    /** block: PC VL RE PE AD */
+    run(block) {
+      if (this._cache[block]) return this._cache[block];
+      const p = this.p, rho = this.rho, nu = this.nu;
+      const res = new Map();
+      const pcRef = (block === "PE" || block === "AD") ? this.run("PC") : null;
+      const gm = CODE[p.metodoGlobal] || "RE";
+      const rule = p.regraDiam === "Mais próximo" ? "near" : "up";
+      for (const o of this.ord) {
+        const t = o.src;
+        let code = block;
+        if (block === "AD") code = t.metodo ? (CODE[t.metodo] || gm) : gm;
+        const par = o.mont === 0 ? null : res.get(o.mont);
+        const tp = o.mont === 0 ? 0 : par.T;
+        const r = { id: o.id, circ: o.circ, leaf: o.leaf, catEff: o.catEff, tp };
+        let dt = null, at = null, vt = null, A, B, mth, dtg;
+        if (o.man) { A = o.man[0]; B = o.man[1]; mth = "MAN"; }
+        else {
+          mth = code;
+          const vl = o.vlim * p.fatorV;
+          if (code === "PC") dt = this.swamee(o);
+          else if (code === "VL") vt = vl;
+          else if (code === "RE") {
+            if (o.catEff === "Tronco") {
+              if (o.mont === 0) vt = p.vini;
+              else if (par.catEff === "Tronco") vt = Math.max(p.vmin, Math.sqrt(Math.max(par.v * par.v - par.fra / (p.recup * rho / 2), 0)));
+              else vt = vl;
+            } else vt = vl;
+          } else if (code === "PE") {
+            if (o.leaf) {
+              let pcc = -Infinity;
+              pcRef.forEach((x) => { if (x.circ === o.circ && x.leaf && x.T > pcc) pcc = x.T; });
+              dt = this.solveLeafPE(o, pcc - tp, o.mont !== 0 ? this.tee(o, par) : 0);
+            } else dt = this.swamee(o);
+          }
+          if (vt != null) at = o.qs / vt;
+          dtg = dt != null ? dt : Math.sqrt(4 * at / Math.PI) * 1000;
+          if (o.geo === "Circular") { const up = rule === "up" || code === "VL"; A = this.roundD(dtg, up); B = null; }
+          else [A, B] = this.rectFrom(o, dt, at);
+        }
+        let ar, de;
+        if (o.geo === "Circular") { ar = Math.PI * Math.pow(A / 1000, 2) / 4; de = A; }
+        else { ar = A * B / 1e6; de = huebscher(A, B); }
+        const v = o.qs / ar;
+        const re = 4 * o.qs / (Math.PI * de / 1000 * nu);
+        const lam = haal(re, o.eps, de / 1000);
+        const dpm = lam / (de / 1000) * rho / 2 * Math.pow(4 * o.qs / (Math.PI * Math.pow(de / 1000, 2)), 2);
+        const fr = dpm * o.len;
+        const tee = o.mont !== 0 ? this.tee(o, par) : 0;
+        const ps = o.sc * rho / 2 * v * v + tee;
+        const S = fr + ps + o.fix;
+        let al;
+        const maxD = Math.max(...this.TAB), maxW = Math.max(...this.W);
+        const fora = mth !== "MAN" && ((o.geo === "Circular" && dtg > maxD + 0.5) ||
+          (o.geo !== "Circular" && Math.max(A, B) >= maxW && ((dt != null && de < dt * 0.995) || (dt == null && ar < at * 0.995))));
+        if (fora) al = "Fora da gama";
+        else if (v > o.vlim + 0.0001) al = "Vel. > limite";
+        else if (o.geo !== "Circular" && Math.max(A, B) / Math.min(A, B) > p.kMax) al = "Rel. aspecto > máx.";
+        else al = "OK";
+        const su = o.scu * rho / 2 * v * v + o.fixu;
+        const tu = su + (o.mont === 0 ? 0 : par.tu);
+        Object.assign(r, { A, B, v, re, dpm, fr, fra: fr * (1 + p.pctAcc), ps, S, T: S + tp, su, tu, te: S + tp - tu, al, mth,
+          dim: o.geo === "Circular" ? "Ø" + A : A + "×" + B, ar,
+          sup: o.geo === "Circular" ? Math.PI * A / 1000 * o.len : 2 * (A + B) / 1000 * o.len });
+        res.set(o.id, r);
+      }
+      // acumulado máximo a jusante e crítico
+      const ordRev = this.ord.slice().reverse();
+      ordRev.forEach((o) => {
+        const r = res.get(o.id);
+        let mx = 0;
+        (this.children.get(o.id) || []).forEach((c) => { const U = res.get(c).U; if (U > mx) mx = U; });
+        r.U = r.S + mx;
+      });
+      const pcMax = {};
+      res.forEach((r) => { if (r.leaf && (pcMax[r.circ] === undefined || r.T > pcMax[r.circ])) pcMax[r.circ] = r.T; });
+      res.forEach((r) => { r.pc = pcMax[r.circ]; r.crit = Math.abs(r.T + r.U - r.S - r.pc) < 0.001; r.xd = r.leaf ? r.pc - r.T : null; });
+      this._cache[block] = res; return res;
+    }
+
+    /** resumo por circuito para um bloco */
+    circuit(name, block) {
+      const res = this.run(block);
+      const c = (this.d.circuitos || []).find((x) => x.nome === name);
+      const mine = [...res.values()].filter((r) => r.circ === name);
+      const leaves = mine.filter((r) => r.leaf);
+      if (!leaves.length || !c) return null;
+      const ptot = Math.max(...leaves.map((r) => r.T));
+      const pext = Math.max(...leaves.map((r) => r.te));
+      const cl = leaves.find((r) => r.crit) || leaves.reduce((a, b) => (b.T > a.T ? b : a));
+      const ptv = (ptot + N(c.dpAdic)) * (1 + N(c.margem)), pev = (pext + N(c.dpAdic)) * (1 + N(c.margem));
+      return { nome: name, q0: c._q0, ptot, pext, pFanTot: ptv, pFanExt: pev, kW: c._q0 * (1 + N(c.fugas)) / 3600 * ptv / (N(c.rend) * 1000),
+        alertas: mine.filter((r) => r.al !== "OK").length, nTrechos: mine.length, nTerm: leaves.length, critEm: cl.id, vmax: Math.max(...mine.map((r) => r.v)), vmin: Math.min(...mine.map((r) => r.v)),
+        dpmMax: Math.max(...mine.map((r) => r.dpm)), ref: c._ref, d0: c._d0, re0: c._re0 };
+    }
+  }
+
+  const api = { Engine, METODOS, CODE, haal, huebscher };
+  if (typeof module !== "undefined" && module.exports) module.exports = api; else root.EngineLib = api;
+})(typeof window !== "undefined" ? window : globalThis);
+</script>
+<script>window.DEFAULT_DATA={"projeto": {"requerente": "Município de Olhão", "obra": "Requalificação da escola básica e secundária Dr. João Lúcio", "local": "Fuseta, Olhão", "data": "Outubro de 2026", "equipamento": "UTA I", "modelo": "", "zona": "Salas de aula – Bloco A", "processo": "", "revisao": "R0", "autor": ""}, "params": {"espaco": "Salas de aula / bibliotecas", "rho": 1.2, "visc": 1.516e-05, "vini": 6.5, "vmin": 2.5, "recup": 0.75, "pctAcc": 0.2, "metodoGlobal": "Rec. estática", "regraDiam": "Por excesso", "fatorV": 1, "kAlvo": 2, "kMax": 4, "modulo": 50, "ladoMin": 100, "temp": 20, "alt": 0}, "circuitos": [{"nome": "Insuflação", "fugas": 0, "margem": 0.1, "rend": 0.6, "dpAdic": 0, "refIn": 0}], "quick": ["CV90-R15", "CV45-C", "TE-D90", "RED-G", "REG-A"], "catalogo": [{"cod": "CV90-R15", "desc": "Curva 90° circular, raio r/D = 1,5", "tipo": "C", "valor": 0.15, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV90-R10", "desc": "Curva 90° circular, raio r/D = 1,0", "tipo": "C", "valor": 0.22, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV90-SEG", "desc": "Curva 90° circular segmentada (5 gomos)", "tipo": "C", "valor": 0.3, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV45-C", "desc": "Curva 45° circular", "tipo": "C", "valor": 0.1, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV90-RR", "desc": "Curva 90° retangular com raio (r/W = 1,0)", "tipo": "C", "valor": 0.25, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV90-RDIR", "desc": "Curva 90° retangular com raio e directrizes", "tipo": "C", "valor": 0.12, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "JO90-E", "desc": "Joelho 90° retangular em esquadria, sem directrizes", "tipo": "C", "valor": 1.2, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "JO90-ED", "desc": "Joelho 90° retangular em esquadria, com directrizes", "tipo": "C", "valor": 0.35, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CV45-R", "desc": "Curva 45° retangular", "tipo": "C", "valor": 0.2, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "TE-D90", "desc": "Derivação 90° (tê) - ramal", "tipo": "C", "valor": 1, "nota": "Depende da razão de caudais/velocidades; usar valor do fabricante/ASHRAE", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "TE-D45", "desc": "Derivação a 45° - ramal", "tipo": "C", "valor": 0.5, "nota": "Idem", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "TE-PASS", "desc": "Derivação - passagem (tronco)", "tipo": "C", "valor": 0.1, "nota": "Idem", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "CALCA", "desc": "Calça simétrica (Y)", "tipo": "C", "valor": 0.3, "nota": "Idem", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "RED-G", "desc": "Redução gradual", "tipo": "C", "valor": 0.05, "nota": "v de jusante", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "RED-B", "desc": "Redução brusca", "tipo": "C", "valor": 0.5, "nota": "v de jusante", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "EXP-G", "desc": "Expansão gradual", "tipo": "C", "valor": 0.25, "nota": "v de montante", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "EXP-B", "desc": "Expansão brusca", "tipo": "C", "valor": 1, "nota": "v de montante", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "ENT-V", "desc": "Entrada em bordo vivo", "tipo": "C", "valor": 0.5, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "ENT-B", "desc": "Entrada com bocal arredondado", "tipo": "C", "valor": 0.05, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "DESC", "desc": "Descarga livre (perda de pressão dinâmica)", "tipo": "C", "valor": 1, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "REG-A", "desc": "Registo de regulação (aberto)", "tipo": "C", "valor": 0.2, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "REG-CF", "desc": "Registo corta-fogo (aberto)", "tipo": "C", "valor": 0.4, "nota": "Preferir valor do fabricante", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "FILTRO-G", "desc": "Filtro grosso (G4), perda média", "tipo": "Pa", "valor": 80, "nota": "", "qnom": 0, "exp": 0, "ambito": "UTA"}, {"cod": "FILTRO-F", "desc": "Filtro fino (F7), perda média", "tipo": "Pa", "valor": 150, "nota": "", "qnom": 0, "exp": 0, "ambito": "UTA"}, {"cod": "BAT-AQ", "desc": "Bateria de água quente", "tipo": "Pa", "valor": 50, "nota": "", "qnom": 0, "exp": 0, "ambito": "UTA"}, {"cod": "BAT-AF", "desc": "Bateria de água fria (húmida)", "tipo": "Pa", "valor": 100, "nota": "", "qnom": 0, "exp": 0, "ambito": "UTA"}, {"cod": "RECUP", "desc": "Recuperador de calor", "tipo": "Pa", "valor": 150, "nota": "", "qnom": 0, "exp": 0, "ambito": "UTA"}, {"cod": "SIL", "desc": "Silenciador de conduta", "tipo": "Pa", "valor": 40, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "TOM-EXT", "desc": "Grelha/louvre de tomada de ar exterior", "tipo": "Pa", "valor": 30, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "DIF", "desc": "Difusor / grelha de insuflação", "tipo": "Pa", "valor": 25, "nota": "Q nominal 1250 m³/h = pressuposto ILUSTRATIVO do exemplo; substituir pelo ponto de catálogo do terminal.", "qnom": 1250, "exp": 2, "ambito": "Rede"}, {"cod": "GRL-R", "desc": "Grelha de retorno / extração", "tipo": "Pa", "valor": 15, "nota": "Q nominal 1250 m³/h = pressuposto ILUSTRATIVO do exemplo; substituir pelo ponto de catálogo do terminal.", "qnom": 1250, "exp": 2, "ambito": "Rede"}, {"cod": "VAV", "desc": "Caixa de caudal variável / constante", "tipo": "Pa", "valor": 50, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "GEN-C", "desc": "Peça genérica (indicar C na coluna 'Valor')", "tipo": "C", "valor": 0, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}, {"cod": "GEN-PA", "desc": "Equipamento genérico (indicar Pa na coluna 'Valor')", "tipo": "Pa", "valor": 0, "nota": "", "qnom": 0, "exp": 0, "ambito": "Rede"}], "materiais": [{"nome": "Aço galvanizado (juntas a 1,2 m)", "eps": 0.09, "nota": "ASHRAE: 'medium smooth'"}, {"nome": "Aço galvanizado espiral", "eps": 0.03, "nota": "Circular, juntas a 3 m"}, {"nome": "Aço carbono", "eps": 0.15, "nota": "Valor do modelo inicial"}, {"nome": "Painel pré-isolado (PIR/PUR)", "eps": 0.09, "nota": "Indicativo"}, {"nome": "Painel de fibra de vidro", "eps": 0.9, "nota": "Indicativo (duct board)"}, {"nome": "Flexível (esticado)", "eps": 3, "nota": "Indicativo; depende da instalação"}, {"nome": "PVC / plástico", "eps": 0.01, "nota": ""}, {"nome": "Betão / alvenaria", "eps": 3, "nota": "Indicativo"}, {"nome": "Outro (editar)", "eps": 0.15, "nota": ""}, {"nome": "Outro (editar)", "eps": 0.15, "nota": ""}], "criterios": [{"nome": "Auditório / estúdio", "tronco": 4, "ramal": 3, "term": 2, "nc": "NC 20-25"}, {"nome": "Quartos / residencial", "tronco": 5, "ramal": 3.5, "term": 2.5, "nc": "NC 25-30"}, {"nome": "Salas de aula / bibliotecas", "tronco": 6.5, "ramal": 4.5, "term": 3, "nc": "NC 30-35"}, {"nome": "Escritórios / refeitórios", "tronco": 7.5, "ramal": 5.5, "term": 3.5, "nc": "NC 35-40"}, {"nome": "Comércio / ginásio / circulações", "tronco": 9, "ramal": 6.5, "term": 4, "nc": "NC 40-45"}, {"nome": "Industrial / técnico", "tronco": 12, "ramal": 9, "term": 6, "nc": "NC > 50"}], "diametros": [80, 90, 100, 112, 125, 140, 160, 180, 200, 224, 250, 280, 315, 355, 400, 450, 500, 560, 630, 710, 800, 900, 1000, 1120, 1250], "derivacoes": [{"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}, {"q": null, "c": null, "nota": ""}], "trechos": [{"id": 1, "desc": "Tronco 1 - saída da UTA", "mont": 0, "circ": "Insuflação", "cat": "Tronco", "qterm": 0, "len": 6, "mat": "Aço galvanizado (juntas a 1,2 m)", "forma": "Retangular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 800, "manB": 400, "n90": 0, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "", "pecas": [{"cod": "REG-CF", "qtd": 1, "valor": "", "ambito": ""}, {"cod": "CV90-RDIR", "qtd": 1, "valor": "", "ambito": ""}, {"cod": "SIL", "qtd": 1, "valor": "", "ambito": ""}, {"cod": "FILTRO-F", "qtd": 1, "valor": "", "ambito": ""}, {"cod": "BAT-AF", "qtd": 1, "valor": "", "ambito": ""}]}, {"id": 2, "desc": "Tronco 2", "mont": 1, "circ": "Insuflação", "cat": "Tronco", "qterm": 0, "len": 8, "mat": "Aço galvanizado (juntas a 1,2 m)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 0, "n45": 0, "nte": 0, "nred": 1, "nreg": 0, "term": "", "pecas": []}, {"id": 3, "desc": "Tronco 3", "mont": 2, "circ": "Insuflação", "cat": "Tronco", "qterm": 0, "len": 8, "mat": "Aço galvanizado (juntas a 1,2 m)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 0, "n45": 0, "nte": 0, "nred": 1, "nreg": 0, "term": "", "pecas": []}, {"id": 4, "desc": "Ramal sala 1", "mont": 1, "circ": "Insuflação", "cat": "Ramal", "qterm": 0, "len": 5, "mat": "Aço galvanizado (juntas a 1,2 m)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 1, "nred": 0, "nreg": 0, "term": "", "pecas": []}, {"id": 5, "desc": "Ramal sala 2", "mont": 2, "circ": "Insuflação", "cat": "Ramal", "qterm": 0, "len": 6, "mat": "Aço galvanizado (juntas a 1,2 m)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 1, "nred": 0, "nreg": 0, "term": "", "pecas": []}, {"id": 6, "desc": "Difusor D1", "mont": 3, "circ": "Insuflação", "cat": null, "qterm": 1250, "len": 4, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}, {"id": 7, "desc": "Difusor D2", "mont": 3, "circ": "Insuflação", "cat": null, "qterm": 1250, "len": 3, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}, {"id": 8, "desc": "Difusor D3", "mont": 4, "circ": "Insuflação", "cat": null, "qterm": 1500, "len": 3, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}, {"id": 9, "desc": "Difusor D4", "mont": 4, "circ": "Insuflação", "cat": null, "qterm": 1500, "len": 4, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}, {"id": 10, "desc": "Difusor D5", "mont": 5, "circ": "Insuflação", "cat": null, "qterm": 1250, "len": 3, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}, {"id": 11, "desc": "Difusor D6", "mont": 5, "circ": "Insuflação", "cat": null, "qterm": 1250, "len": 4, "mat": "Flexível (esticado)", "forma": "Circular", "hfix": 0, "kasp": 0, "metodo": "", "manA": 0, "manB": 0, "n90": 1, "n45": 0, "nte": 0, "nred": 0, "nreg": 0, "term": "DIF", "pecas": []}]};</script>
+<script>
+"use strict";
+const { Engine, METODOS } = window.EngineLib;
+const KEY = "condutas-avac-v1";
+let S = { data: null, sel: null, view: "rede", circ: null };
+const $ = (s, e) => (e || document).querySelector(s);
+const clone = (x) => JSON.parse(JSON.stringify(x));
+function h(tag, attrs, ...kids) {
+  const e = document.createElement(tag);
+  for (const [k, v] of Object.entries(attrs || {})) {
+    if (k === "class") e.className = v; else if (k.startsWith("on")) e.addEventListener(k.slice(2), v);
+    else if (k === "html") e.innerHTML = v; else if (v !== false && v != null) e.setAttribute(k, v === true ? "" : v);
+  }
+  kids.flat().forEach((c) => { if (c != null && c !== false) e.append(c.nodeType ? c : document.createTextNode(c)); });
+  return e;
+}
+const fmt = (n, d = 1) => (typeof n === "number" && isFinite(n) ? n.toLocaleString("pt-PT", { minimumFractionDigits: d, maximumFractionDigits: d }) : "—");
+const parseNum = (s) => { if (typeof s === "number") return s; s = String(s ?? "").replace(/\s/g, "").replace(",", "."); if (s === "") return null; const n = Number(s); return isFinite(n) ? n : null; };
+const esc = (s) => String(s ?? "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+
+/* ---------------- dados ---------------- */
+function load() {
+  try { const s = localStorage.getItem(KEY); if (s) { S.data = JSON.parse(s); } } catch (e) {}
+  if (!S.data) S.data = clone(window.DEFAULT_DATA);
+  migrate();
+  S.circ = S.data.circuitos[0] && S.data.circuitos[0].nome;
+  S.sel = S.data.trechos.length ? S.data.trechos[0].id : null;
+}
+function migrate() { S.data.projeto = Object.assign({ titulo: "Dimensionamento de condutas AVAC", logo: "" }, S.data.projeto || {}); const d = S.data, D = window.DEFAULT_DATA; for (const k of Object.keys(D)) if (d[k] === undefined) d[k] = clone(D[k]); for (const k of Object.keys(D.params)) if (d.params[k] === undefined) d.params[k] = D.params[k]; }
+let saveT;
+function save() { clearTimeout(saveT); saveT = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S.data)); } catch (e) {} }, 200); }
+let E, cache = {};
+function recalc() { try { E = new Engine(S.data); } catch (e) { console.error(e); E = null; } save(); }
+const trow = (id) => S.data.trechos.find((t) => t.id === id);
+const nextId = () => Math.max(0, ...S.data.trechos.map((t) => Number(t.id) || 0)) + 1;
+function changed(rerenderEdit) { recalc(); renderHeader(); renderKpis(); renderTree(); if (rerenderEdit) renderEdit(); else renderResultBox(); if (S.view !== "rede") renderView(); }
+
+/* ---------------- árvore ---------------- */
+function ordered() {
+  const rows = S.data.trechos.filter((t) => t.circ === S.circ);
+  const ids = new Set(S.data.trechos.map((t) => t.id));
+  const kids = new Map(); rows.forEach((t) => kids.set(t.id, []));
+  const roots = [];
+  rows.forEach((t) => { if (t.mont === 0 || !kids.has(t.mont)) roots.push(t); else kids.get(t.mont).push(t); });
+  const out = [], seen = new Set();
+  const walk = (t, dp) => { if (seen.has(t.id)) return; seen.add(t.id); out.push({ t, dp }); (kids.get(t.id) || []).forEach((c) => walk(c, dp + 1)); };
+  roots.forEach((t) => walk(t, 0));
+  rows.forEach((t) => { if (!seen.has(t.id)) walk(t, 0); });
+  return out;
+}
+function renderTree() {
+  const el = $("#treeList"); el.innerHTML = "";
+  const res = E && E.run("AD");
+  ordered().forEach(({ t, dp }) => {
+    const r = res && res.get(t.id);
+    const err = E && E.errors[t.id];
+    const leaf = !S.data.trechos.some((x) => x.mont === t.id);
+    const row = h("div", { class: "trow" + (S.sel === t.id ? " sel" : "") + (r && r.crit ? " crit" : ""), onclick: () => { S.sel = t.id; renderTree(); renderEdit(); } },
+      h("span", { style: `width:${dp * 16}px;flex:none;color:#9aa6bd;text-align:right`, html: dp ? "└" : "" }),
+      h("span", { class: "id" }, "#" + t.id),
+      h("span", { class: "nm" }, (leaf ? "◂ " : "") + (t.desc || (leaf ? "Terminal" : t.cat))),
+      err ? h("span", { class: "er" }, err) : h("span", { class: "r" }, r ? h("span", {}, fmt(E.idx.get(t.id).q, 0) + " m³/h · " + r.dim + " · " + fmt(r.v, 1) + " m/s · ", h("b", { class: r.al !== "OK" ? "al" : "" }, fmt(r.S, 0) + " Pa"), r.al !== "OK" ? " ⚠" : "") : "—"));
+    el.append(row);
+  });
+  const tb = $("#treeTb"); tb.innerHTML = "";
+  const sel = trow(S.sel);
+  tb.append(h("button", { class: "btn sm", onclick: () => novoDlg() }, "Novo"),
+    h("button", { class: "btn sm ghost", onclick: () => dup() }, "Duplicar"),
+    h("button", { class: "btn sm red", onclick: () => del() }, "Eliminar"));
+}
+function newTrecho(over) {
+  const p = over.mont ? trow(over.mont) : null;
+  return Object.assign({ id: nextId(), desc: "", mont: 0, circ: S.circ, cat: "Ramal", qterm: 0, len: 3, mat: p ? p.mat : "Aço galvanizado (juntas a 1,2 m)", forma: p ? p.forma : "Circular", hfix: 0, kasp: 0, metodo: "", manA: 0, manB: 0, n90: 0, n45: 0, nte: 0, nred: 0, nreg: 0, term: "", pecas: [] }, over);
+}
+function novoDlg() {
+  const d = S.data, sel = trow(S.sel);
+  const st = { mont: sel && sel.circ === S.circ ? sel.id : 0, tipo: sel && sel.circ === S.circ ? "Ramal" : "Tronco", desc: "", len: 3, q: 0, term: "" };
+  const termDef = d.catalogo.find((c) => /^(DIF|GRL|BOC|GR)/i.test(c.cod));
+  st.term = termDef ? termDef.cod : "";
+  const dlg = $("#dlgNovo"), box = dlg.firstElementChild;
+  const draw = () => {
+    box.innerHTML = "";
+    const par = st.mont ? trow(st.mont) : null;
+    const parLeaf = par && !d.trechos.some((x) => x.mont === par.id);
+    const tipos = [["Tronco", "Tronco", "conduta principal"], ["Ramal", "Ramal", "derivação para uma zona"], ["Terminal", "Terminal", "difusor, grelha ou boca"]];
+    const add = (...xs) => xs.forEach((x) => { if (x != null && x !== false) box.append(x); });
+    add(h("h3", { style: "margin-top:0" }, "Novo trecho"),
+      field("Onde liga?", h("select", { onchange: (e) => { st.mont = Number(e.target.value); if (st.mont === 0 && st.tipo === "Ramal") st.tipo = "Tronco"; draw(); } },
+        h("option", { value: 0, selected: st.mont === 0 }, "Origem — sai do equipamento (UTA / ventilador)"),
+        ...ordered().map(({ t, dp }) => h("option", { value: t.id, selected: st.mont === t.id }, `${"\u00A0\u00A0".repeat(dp)}Continua depois de #${t.id} ${t.desc || ""}`)))),
+      parLeaf ? h("p", { class: "hint", style: "color:#b4530c" }, `#${par.id} deixa de ser terminal: o seu caudal passa a ser a soma dos trechos a jusante.`) : null,
+      h("p", { class: "hint", style: "margin:10px 0 4px" }, "O que é este trecho?"),
+      h("div", { style: "display:grid;grid-template-columns:repeat(3,1fr);gap:8px" }, tipos.map(([k, l, sub]) => h("button", { class: "btn" + (st.tipo === k ? "" : " sec"), style: "padding:10px 6px;line-height:1.25", onclick: () => { st.tipo = k; draw(); } }, h("b", {}, l), h("br"), h("small", {}, sub)))),
+      h("div", { class: "grid", style: "margin-top:10px" },
+        field("Descrição", (() => { const i = h("input", { type: "text", value: st.desc }); i.addEventListener("input", () => (st.desc = i.value)); return i; })()),
+        field("Comprimento (m)", (() => { const i = h("input", { type: "text", inputmode: "decimal", value: String(st.len).replace(".", ",") }); i.addEventListener("input", () => (st.len = parseNum(i.value) ?? 0)); return i; })()),
+        st.tipo === "Terminal" ? field("Caudal (m³/h)", (() => { const i = h("input", { type: "text", inputmode: "decimal", value: st.q ? String(st.q).replace(".", ",") : "" }); i.addEventListener("input", () => (st.q = parseNum(i.value) ?? 0)); return i; })()) : null,
+        st.tipo === "Terminal" ? field("Terminal / equipamento", h("select", { onchange: (e) => (st.term = e.target.value) }, h("option", { value: "" }, "(nenhum)"), ...d.catalogo.map((c) => h("option", { value: c.cod, selected: c.cod === st.term }, `${c.cod} — ${c.desc}`)))) : null),
+      st.tipo !== "Terminal" ? h("p", { class: "hint" }, "O caudal de um tronco ou ramal é calculado automaticamente pela soma dos terminais a jusante.") : null,
+      h("div", { style: "display:flex;gap:8px;margin-top:12px;flex-wrap:wrap" },
+        h("button", { class: "btn org", onclick: () => { criar(); dlg.classList.remove("on"); } }, "Criar"),
+        h("button", { class: "btn", onclick: () => { criar(); st.desc = ""; st.q = st.q; draw(); } }, "Criar e adicionar outro"),
+        h("button", { class: "btn ghost", onclick: () => dlg.classList.remove("on") }, "Cancelar")));
+  };
+  const criar = () => {
+    const par = st.mont ? trow(st.mont) : null;
+    const t = newTrecho({ mont: st.mont, circ: par ? par.circ : S.circ, cat: st.tipo === "Tronco" ? "Tronco" : "Ramal", desc: st.desc, len: st.len, qterm: st.tipo === "Terminal" ? st.q : 0, term: st.tipo === "Terminal" ? st.term : "" });
+    d.trechos.push(t); S.sel = t.id;
+    if (st.tipo === "Terminal") { /* mantém o mesmo ponto de ligação para o próximo */ } else st.mont = t.id;
+    changed(true);
+  };
+  draw(); dlg.classList.add("on");
+}
+function dup() { const p = trow(S.sel); if (!p) return; const t = Object.assign(clone(p), { id: nextId(), desc: (p.desc || "") + " (cópia)" }); S.data.trechos.push(t); S.sel = t.id; changed(true); }
+function del() {
+  const p = trow(S.sel); if (!p) return;
+  const sub = new Set([p.id]); let grow = true;
+  while (grow) { grow = false; S.data.trechos.forEach((t) => { if (!sub.has(t.id) && sub.has(t.mont)) { sub.add(t.id); grow = true; } }); }
+  if (!confirm(sub.size > 1 ? `Eliminar #${p.id} e os ${sub.size - 1} trecho(s) a jusante?` : `Eliminar #${p.id}?`)) return;
+  S.data.trechos = S.data.trechos.filter((t) => !sub.has(t.id));
+  const o = ordered(); S.sel = o.length ? o[0].t.id : null; changed(true);
+}
+
+/* ---------------- editor do trecho ---------------- */
+function field(label, el) { return h("label", { class: "f" }, label, el); }
+function inText(obj, key, opts = {}) {
+  const i = h("input", { type: "text", inputmode: opts.num ? "decimal" : "text", value: obj[key] == null ? "" : (opts.num && typeof obj[key] === "number" ? String(obj[key]).replace(".", ",") : obj[key]) });
+  i.addEventListener("change", () => { obj[key] = opts.num ? (parseNum(i.value) ?? (opts.nullable ? null : 0)) : i.value; (opts.after || (() => changed(false)))(); });
+  i.addEventListener("focus", () => i.select());
+  return i;
+}
+function inSel(obj, key, list, opts = {}) {
+  const s = h("select", {}, list.map((o) => { const v = typeof o === "object" ? o.v : o, l = typeof o === "object" ? o.l : o; return h("option", { value: v, selected: String(obj[key]) === String(v) }, l); }));
+  s.addEventListener("change", () => { obj[key] = opts.num ? Number(s.value) : s.value; (opts.after || (() => changed(true)))(); });
+  return s;
+}
+function stepper(obj, key) {
+  const sp = h("span", {}, String(obj[key] || 0));
+  const set = (d) => { obj[key] = Math.max(0, (obj[key] || 0) + d); sp.textContent = obj[key]; changed(false); };
+  return h("div", { class: "step" }, h("button", { onclick: () => set(-1) }, "−"), sp, h("button", { onclick: () => set(1) }, "+"));
+}
+function renderEdit() {
+  const el = $("#edit"); el.innerHTML = "";
+  const t = trow(S.sel);
+  if (!t) { el.append(h("p", { class: "hint" }, "Sem trechos neste circuito. Use «＋ Origem» para começar.")); return; }
+  const leaf = !S.data.trechos.some((x) => x.mont === t.id);
+  const d = S.data;
+  el.append(h("h3", { style: "margin-top:0" }, `Trecho #${t.id} ${leaf ? "· terminal" : ""}`));
+  const g1 = h("div", { class: "grid" },
+    field("Descrição", inText(t, "desc", { after: () => changed(false) })),
+    field("A montante (0 = origem)", inSel(t, "mont", [{ v: 0, l: "0 — origem" }, ...d.trechos.filter((x) => x.id !== t.id && x.circ === t.circ).map((x) => ({ v: x.id, l: `#${x.id} ${x.desc || ""}` }))], { num: true })),
+    field("Categoria", leaf ? h("input", { value: "Terminal (automático)", readonly: true }) : inSel(t, "cat", ["Tronco", "Ramal"])),
+    field("Circuito", inSel(t, "circ", d.circuitos.map((c) => c.nome).filter(Boolean))),
+    field(leaf ? "Caudal terminal (m³/h)" : "Caudal (m³/h, soma a jusante)", leaf ? inText(t, "qterm", { num: true }) : h("input", { value: E && E.idx.get(t.id) ? fmt(E.idx.get(t.id).q, 0) : "—", readonly: true })),
+    field("Comprimento (m)", inText(t, "len", { num: true })),
+    field("Material", inSel(t, "mat", d.materiais.map((m) => m.nome))));
+  el.append(g1);
+  el.append(h("h3", {}, "Geometria e método"));
+  el.append(h("div", { class: "grid" },
+    field("Forma", inSel(t, "forma", ["Circular", "Retangular"])),
+    t.forma === "Retangular" ? field("Altura fixa (mm, 0 = livre)", inText(t, "hfix", { num: true })) : null,
+    t.forma === "Retangular" ? field("Rel. aspeto (0 = alvo)", inText(t, "kasp", { num: true })) : null,
+    field("Método deste trecho", inSel(t, "metodo", [{ v: "", l: "(global)" }, ...METODOS], { after: () => changed(false) })),
+    field(t.forma === "Retangular" ? "Lado A manual (mm)" : "Ø manual (mm)", inText(t, "manA", { num: true })),
+    t.forma === "Retangular" ? field("Lado B manual (mm)", inText(t, "manB", { num: true })) : null));
+  el.append(h("h3", {}, "Peças e terminal"));
+  const q = d.quick;
+  el.append(h("div", { class: "grid" },
+    field(`Curvas 90° (${q[0]})`, stepper(t, "n90")), field(`Curvas 45° (${q[1]})`, stepper(t, "n45")), field(`Tês / derivações (${q[2]})`, stepper(t, "nte")),
+    field(`Reduções (${q[3]})`, stepper(t, "nred")), field(`Registos (${q[4]})`, stepper(t, "nreg")),
+    field("Terminal / equipamento", inSel(t, "term", [{ v: "", l: "(nenhum)" }, ...d.catalogo.map((c) => ({ v: c.cod, l: `${c.cod} — ${c.desc}` }))]))));
+  // peças especiais
+  const pt = h("table", { class: "t" }, h("tr", {}, ["Código", "Qtd.", "Valor (opc.)", "Âmbito", ""].map((x) => h("th", {}, x))));
+  (t.pecas || []).forEach((p, i) => {
+    const cat = d.catalogo.find((c) => c.cod === p.cod);
+    pt.append(h("tr", {},
+      h("td", {}, inSel(p, "cod", d.catalogo.map((c) => ({ v: c.cod, l: `${c.cod} — ${c.desc}` })), { after: () => changed(true) })),
+      h("td", { style: "width:70px" }, inText(p, "qtd", { num: true })),
+      h("td", { style: "width:90px" }, inText(p, "valor", { num: true, nullable: true, after: () => { if (p.valor === null) p.valor = ""; changed(false); } })),
+      h("td", { style: "width:110px" }, inSel(p, "ambito", [{ v: "", l: `(${cat ? cat.ambito : "Rede"})` }, "UTA", "Rede"], { after: () => changed(false) })),
+      h("td", { style: "width:40px" }, h("button", { class: "btn sm red", onclick: () => { t.pecas.splice(i, 1); changed(true); } }, "✕"))));
+  });
+  el.append(pt, h("button", { class: "btn sm ghost", style: "margin-top:6px", onclick: () => { t.pecas = t.pecas || []; t.pecas.push({ cod: d.catalogo[0].cod, qtd: 1, valor: "", ambito: "" }); changed(true); } }, "＋ Peça / equipamento"));
+  el.append(h("h3", {}, "Resultado"), h("div", { id: "resBox" }));
+  renderResultBox();
+}
+function renderResultBox() {
+  const box = $("#resBox"); if (!box) return; box.innerHTML = "";
+  const t = trow(S.sel); if (!t) return;
+  if (!E) { box.append(h("p", { class: "bad" }, "Erro no cálculo.")); return; }
+  const err = E.errors[t.id];
+  if (err) { box.append(h("p", { class: "bad" }, "⚠ " + err)); return; }
+  const r = E.run("AD").get(t.id);
+  const it = (l, v, cls) => h("div", {}, h("span", {}, l), h("b", { class: cls || "" }, v));
+  box.append(h("div", { class: "res" }, it("Método efetivo", r.mth === "MAN" ? "Manual" : r.mth), it("Dimensão", r.dim), it("Velocidade", fmt(r.v, 2) + " m/s", r.al === "Vel. > limite" ? "bad" : ""),
+    it("Δp unitária", fmt(r.dpm, 2) + " Pa/m"), it("Perda do trecho", fmt(r.S, 1) + " Pa"), it("Acumulada total", fmt(r.T, 1) + " Pa"), it("Acumulada externa", fmt(r.te, 1) + " Pa"),
+    it("A dissipar", r.xd == null ? "—" : fmt(r.xd, 1) + " Pa"), it("Estado", r.al, r.al !== "OK" ? "bad" : ""), it("Crítico", r.crit ? "● sim" : "não")));
+  // comparação dos 4 métodos para este trecho
+  const tb = h("table", { class: "t cmp", style: "margin-top:8px" }, h("tr", {}, ["Método", "Dimensão", "v (m/s)", "Δp trecho (Pa)", "Estado"].map((x) => h("th", {}, x))));
+  METODOS.forEach((m) => { const x = E.run(window.EngineLib.CODE[m]).get(t.id); if (x) tb.append(h("tr", {}, h("td", { class: "l" }, m), h("td", {}, x.dim), h("td", {}, fmt(x.v, 2)), h("td", {}, fmt(x.S, 1)), h("td", { class: x.al !== "OK" ? "bad" : "" }, x.al))); });
+  box.append(tb);
+}
+
+/* ---------------- cabeçalho, KPIs ---------------- */
+function renderHeader() {
+  const p = S.data.projeto;
+  $("#hdrEq").textContent = (p.equipamento || "—") + (p.modelo ? " · " + p.modelo : "");
+  const sc = $("#selCirc"); sc.innerHTML = "";
+  S.data.circuitos.filter((c) => c.nome).forEach((c) => sc.append(h("option", { value: c.nome, selected: c.nome === S.circ }, c.nome)));
+  const sm = $("#selMet"); sm.innerHTML = "";
+  METODOS.forEach((m) => sm.append(h("option", { value: m, selected: m === S.data.params.metodoGlobal }, m)));
+  const nav = $("#nav"); nav.innerHTML = "";
+  [["ficheiro", "Ficheiro"], ["rede", "Rede"], ["esquema", "Esquema"], ["resumo", "Resumo A4"], ["def", "Definições"]].forEach(([k, l]) => nav.append(h("button", { class: S.view === k ? "on" : "", onclick: () => setView(k) }, l)));
+}
+function kpiData() { return E ? E.circuit(S.circ, "AD") : null; }
+function renderKpis() {
+  const k = kpiData(), el = $("#kpis"); el.innerHTML = "";
+  const c = S.data.circuitos.find((x) => x.nome === S.circ) || {};
+  const it = (l, v, u, e) => h("div", { class: "k" + (e ? " e" : "") }, h("span", {}, l), h("b", {}, v), " ", h("i", {}, u));
+  if (!k) { el.append(h("div", { class: "k" }, h("span", {}, "Circuito"), h("b", {}, "—"), h("i", {}, " sem dados válidos"))); return; }
+  el.append(it("Caudal à origem", fmt(k.q0, 0), "m³/h"), it("Perda TOTAL crítico", fmt(k.ptot, 1), "Pa"), it("Perda EXTERNA (rede)", fmt(k.pext, 1), "Pa", 1),
+    it("Pressão total vent.", fmt(k.pFanTot, 0), "Pa"), it("Pressão externa a fornecer", fmt(k.pFanExt, 0), "Pa", 1),
+    it("Potência", fmt(k.kW, 2), "kW · " + (k.alertas ? "⚠ " + k.alertas + " alerta(s)" : "✔ sem alertas")));
+}
+
+/* ---------------- esquema (SVG) ---------------- */
+function schemaSVG(compact) {
+  if (!E) return "<p>Sem dados.</p>";
+  const res = E.run("AD");
+  const nodes = E.ord.filter((o) => o.circ === S.circ);
+  if (!nodes.length) return "<p class='hint'>Sem trechos válidos neste circuito.</p>";
+  const kids = new Map(); nodes.forEach((o) => kids.set(o.id, []));
+  const roots = [];
+  nodes.forEach((o) => { if (o.mont === 0 || !kids.has(o.mont)) roots.push(o); else kids.get(o.mont).push(o); });
+  const W = compact ? 104 : 168, H = compact ? 24 : 44, GAP = compact ? 18 : 34, PITCH = H + (compact ? 6 : 14), FS = compact ? 7.2 : 12;
+  let row = 0, maxLvl = 0; const pos = new Map();
+  const place = (o, lvl) => {
+    maxLvl = Math.max(maxLvl, lvl); const ks = kids.get(o.id);
+    let y;
+    if (!ks.length) { y = row++; } else { ks.forEach((c) => place(c, lvl + 1)); const ys = ks.map((c) => pos.get(c.id).y); y = Math.round((Math.min(...ys) + Math.max(...ys)) / 2); }
+    pos.set(o.id, { lvl, y });
+  };
+  roots.forEach((r) => place(r, 0));
+  const w = (maxLvl + 1) * W + maxLvl * GAP + 4, hh = row * PITCH + 4;
+  const X = (l) => 2 + l * (W + GAP), Y = (y) => 2 + y * PITCH;
+  let dark = "", org = "", boxes = "";
+  const LW = compact ? 2 : 3;
+  nodes.forEach((o) => {
+    const p = pos.get(o.id), r = res.get(o.id), ks = kids.get(o.id);
+    const x = X(p.lvl), yb = Y(p.y) + H;
+    if (ks.length) {
+      const xm = x + W + GAP / 2;
+      const ys = ks.map((c) => Y(pos.get(c.id).y) + H).concat(yb);
+      const seg = (cls, x1, y1, x2, y2) => `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke-width="${LW}"/>`;
+      const critKid = ks.find((c) => res.get(c.id).crit);
+      dark += seg("", x + W, yb, xm, yb) + seg("", xm, Math.min(...ys), xm, Math.max(...ys));
+      ks.forEach((c) => { dark += seg("", xm, Y(pos.get(c.id).y) + H, X(pos.get(c.id).lvl), Y(pos.get(c.id).y) + H); });
+      if (critKid) {
+        const yc = Y(pos.get(critKid.id).y) + H;
+        org += seg("", x + W, yb, xm, yb) + seg("", xm, Math.min(yb, yc), xm, Math.max(yb, yc)) + seg("", xm, yc, X(pos.get(critKid.id).lvl), yc);
+      }
+    }
+    const fill = r.crit ? "#FCE4D6" : o.leaf ? "#DDEBF7" : "none";
+    const col = r.al !== "OK" ? "#C00000" : "#1b2433";
+    const t1 = `#${o.id} ${(o.src.desc || (o.leaf ? "Terminal" : o.src.cat))}`.slice(0, compact ? 20 : 26);
+    const lines = compact ? [t1, `${r.dim} · ${fmt(r.v, 1)} m/s · Σ${fmt(r.T, 0)}`] : [t1, `${r.dim} · ${fmt(r.v, 1)} m/s`, `${fmt(o.q, 0)} m³/h · Σ${fmt(r.T, 0)} Pa`];
+    const txt = lines.map((l, i) => `<text x="${x + 3}" y="${Y(p.y) + (compact ? 9 : 12) + i * (FS + (compact ? 1.5 : 2.5))}" font-size="${FS}" fill="${col}" ${i === 0 ? 'font-weight="bold"' : ""}>${esc(l)}</text>`).join("");
+    boxes += `<g class="node" data-id="${o.id}"><rect x="${x}" y="${Y(p.y)}" width="${W}" height="${H}" fill="${fill}" stroke="none"/>${txt}</g>`;
+    const ul = `<line x1="${x}" y1="${yb}" x2="${x + W}" y2="${yb}" stroke-width="${LW}"/>`;
+    if (r.crit) org += ul; else dark += ul;
+  });
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${hh}" width="${compact ? "100%" : w}" ${compact ? 'preserveAspectRatio="xMinYMin meet" style="max-height:64mm"' : ""} font-family="Arial,Helvetica,sans-serif"><g stroke="#404040" stroke-linecap="butt">${dark}</g><g stroke="#ED7D31" stroke-linecap="butt">${org}</g>${boxes}</svg>`;
+}
+function renderEsquema() {
+  const w = $("#schemaWrap");
+  w.innerHTML = `<div class="hint" style="margin-bottom:6px">Caminho crítico a laranja · azul = terminal · vermelho = alerta. Toque numa caixa para editar o trecho.</div>` + schemaSVG(false);
+  w.querySelectorAll(".node").forEach((n) => n.addEventListener("click", () => { S.sel = Number(n.dataset.id); setView("rede"); }));
+}
+
+/* ---------------- resumo A4 ---------------- */
+function barsSVG(rows) {
+  if (!rows.length) return "";
+  const mx = Math.max(...rows.map((r) => r.T)) * 1.15, W = 330, Hh = 78, bw = Math.min(34, (W - 30) / rows.length / 2.6);
+  const slot = (W - 30) / rows.length;
+  let s = `<svg viewBox="0 0 ${W} ${Hh + 24}" width="100%" font-family="Arial" font-size="9"><line x1="24" y1="${Hh}" x2="${W}" y2="${Hh}" stroke="#888"/>`;
+  rows.forEach((r, i) => {
+    const x = 28 + i * slot, h1 = r.T / mx * (Hh - 12), h2 = r.te / mx * (Hh - 12);
+    s += `<rect x="${x}" y="${Hh - h1}" width="${bw}" height="${h1}" fill="#1F3864"/><rect x="${x + bw + 2}" y="${Hh - h2}" width="${bw}" height="${h2}" fill="#ED7D31"/>`;
+    s += `<text x="${x + bw / 2}" y="${Hh - h1 - 3}" text-anchor="middle" font-size="8">${fmt(r.T, 0)}</text><text x="${x + bw * 1.5 + 2}" y="${Hh - h2 - 3}" text-anchor="middle" font-size="8" fill="#b4530c">${fmt(r.te, 0)}</text>`;
+    s += `<text x="${x + bw}" y="${Hh + 11}" text-anchor="middle">#${r.id}</text>`;
+  });
+  s += `<rect x="30" y="${Hh + 15}" width="8" height="7" fill="#1F3864"/><text x="41" y="${Hh + 22}">Acum. total (Pa)</text><rect x="130" y="${Hh + 15}" width="8" height="7" fill="#ED7D31"/><text x="141" y="${Hh + 22}">Acum. externa (Pa)</text></svg>`;
+  return s;
+}
+function renderResumo() {
+  const host = $("#pageHost"); host.innerHTML = "";
+  const p = S.data.projeto, pr = S.data.params;
+  const k = kpiData();
+  if (!E || !k) { host.innerHTML = "<div class='card'>Sem dados válidos no circuito escolhido.</div>"; return; }
+  const res = E.run("AD");
+  const mine = ordered().map((x) => x.t).filter((t) => res.has(t.id));
+  const cmp = METODOS.map((m) => ({ m, c: E.circuit(S.circ, window.EngineLib.CODE[m]) }));
+  const path = []; { const byLvl = [...res.values()].filter((r) => r.circ === S.circ && r.crit); const depth = (r) => { let n = 0, id = r.id; while (E.idx.get(id).mont !== 0) { id = E.idx.get(id).mont; n++; } return n; }; byLvl.sort((a, b) => depth(a) - depth(b)).forEach((r) => path.push(r)); }
+  const c = S.data.circuitos.find((x) => x.nome === S.circ);
+  const hdr = (n, ntot) => `<div class="ban"><div style="display:flex;gap:4mm;align-items:center">${p.logo ? `<img src="${p.logo}" style="height:12mm;max-width:34mm;object-fit:contain;background:#fff;padding:1mm;border-radius:1mm">` : ""}<div><small>EQUIPAMENTO</small><div class="big">${esc(p.equipamento || "—")}${p.modelo ? " · " + esc(p.modelo) : " · (modelo por indicar)"}</div><div class="sv">${p.zona ? "Serviço: " + esc(p.zona) : ""}</div></div></div>
+    <div class="meta"><i>PROCESSO N.º</i><span>${esc(p.processo || "—")}</span><i>REVISÃO · DATA</i><span>${esc(p.revisao || "—")} · ${esc(p.data || "")}</span><i>AUTOR</i><span>${esc(p.autor || "—")}</span></div></div>`;
+  const kp = (l, v, u, e) => `<div class="${e ? "e" : ""}"><span>${l}</span><b>${v}</b><i>${u}</i></div>`;
+  const ver = [["Trechos do circuito", k.nTrechos], ["Terminais", k.nTerm], ["Trechos com alertas", k.alertas ? `<span style="color:#C00000">${k.alertas}</span>` : "0"], ["v máx. / mín.", `${fmt(k.vmax, 1)} / ${fmt(k.vmin, 1)} m/s`], ["Δp/m máx.", `${fmt(k.dpmMax, 2)} Pa/m`], ["Crítico termina em", "#" + k.critEm]];
+  const crit = [["Método global", pr.metodoGlobal], ["Tipo de espaço", pr.espaco], ["ρ · ν", `${fmt(pr.rho, 2)} kg/m³ · ${fmt(pr.visc * 1e6, 2)}×10⁻⁶ m²/s`], ["Fugas · margem", `${fmt(c.fugas * 100, 1)} % · ${fmt(c.margem * 100, 1)} %`], ["Regra de diâmetros", pr.regraDiam], ["Δp/m de referência", `${fmt(k.ref, 3)} Pa/m`]];
+  const NR = 16;
+  const rows = mine.slice(0, NR).map((t) => { const r = res.get(t.id); return `<tr class="${r.crit ? "c" : ""}"><td>${t.id}</td><td class="l">${esc(t.desc || (r.leaf ? "Terminal" : t.cat))}</td><td>${t.mont}</td><td>${fmt(E.idx.get(t.id).q, 0)}</td><td>${r.dim}</td><td>${fmt(r.v, 2)}</td><td>${fmt(r.dpm, 2)}</td><td>${fmt(r.S, 1)}</td><td>${fmt(r.T, 1)}</td><td>${fmt(r.te, 1)}</td><td class="${r.al !== "OK" ? "w" : ""}">${r.al}</td></tr>`; }).join("");
+  const cmpRows = cmp.map((x) => `<tr><td class="l">${x.m}</td><td>${x.c ? fmt(x.c.ptot, 1) : "—"}</td><td>${x.c ? fmt(x.c.pext, 1) : "—"}</td><td>${x.c ? fmt(x.c.pFanTot, 0) : "—"}</td><td>${x.c ? fmt(x.c.vmax, 2) : "—"}</td></tr>`).join("") +
+    `<tr style="background:#DDEBF7;font-weight:bold"><td class="l">ADOTADO</td><td>${fmt(k.ptot, 1)}</td><td>${fmt(k.pext, 1)}</td><td>${fmt(k.pFanTot, 0)}</td><td>${fmt(k.vmax, 2)}</td></tr>`;
+  const more = mine.length > NR;
+  let html = `<div class="page">${hdr()}
+   <div class="ttl"><h1>${esc((p.titulo || "Dimensionamento de condutas AVAC").toUpperCase())} — FICHA RESUMO</h1><div><b>Circuito: ${esc(S.circ)}</b> &nbsp; <b style="color:${k.alertas ? "#C00000" : "#2e7d32"}">${k.alertas ? "⚠ " + k.alertas + " trecho(s) com alerta" : "✔ Sem alertas"}</b></div></div>
+   <div style="font-size:7pt;color:#555">${esc(p.requerente)} · ${esc(p.obra)} · ${esc(p.local)}</div>
+   <div class="pk">${kp("Caudal à origem", fmt(k.q0, 0), "m³/h")}${kp("Perda total · crítico", fmt(k.ptot, 1), "Pa (rede + equip. UTA)")}${kp("Perda externa · rede", fmt(k.pext, 1), "Pa (só rede)", 1)}${kp("Pressão total ventilador", fmt(k.pFanTot, 0), `Pa (margem ${fmt(c.margem * 100, 0)} %)`)}${kp("Pressão externa a fornecer", fmt(k.pFanExt, 0), "Pa (estática externa)", 1)}${kp("Potência absorvida", fmt(k.kW, 2), `kW (η ${fmt(c.rend * 100, 0)} %)`)}</div>
+   <div class="two"><div><div class="sec">Esquema da rede — caminho crítico a laranja</div><div style="height:66mm;overflow:hidden">${schemaSVG(true)}</div></div>
+   <div><div class="sec">Critérios e pressupostos</div><div class="crit-l">${crit.map((x) => `<div>${x[0]}</div><div>${x[1]}</div>`).join("")}</div><div class="sec">Verificações</div><div class="crit-l">${ver.map((x) => `<div>${x[0]}</div><div>${x[1]}</div>`).join("")}</div></div></div>
+   <div class="two" style="grid-template-columns:1fr 100mm;margin-top:1mm"><div><div class="sec">Trechos do circuito${more ? " (primeiros " + NR + " — lista completa na página seguinte)" : ""}</div><table class="pt"><tr><th>#</th><th>Descrição</th><th>Mont.</th><th>Q (m³/h)</th><th>Dimensão</th><th>v (m/s)</th><th>Δp/m</th><th>Δp trecho</th><th>Acum. total</th><th>Acum. ext.</th><th>Estado</th></tr>${rows}</table></div>
+   <div><div class="sec">Perfil de pressão no caminho crítico</div>${barsSVG(path.map((r) => ({ id: r.id, T: r.T, te: r.te })))}<div class="sec">Comparação de métodos</div><table class="pt"><tr><th>Método</th><th>Perda total</th><th>Perda ext.</th><th>P. vent.</th><th>v máx.</th></tr>${cmpRows}</table></div></div>
+   <div class="pf"><span>${esc(p.equipamento)} · ${esc(p.processo || "")} · Rev. ${esc(p.revisao)}</span><span>Gerado por Condutas AVAC (valores indicativos — confirmar dados de catálogo)</span></div></div>`;
+  if (more) {
+    const all = mine.map((t) => { const r = res.get(t.id); return `<tr class="${r.crit ? "c" : ""}"><td>${t.id}</td><td class="l">${esc(t.desc || (r.leaf ? "Terminal" : t.cat))}</td><td>${t.mont}</td><td>${fmt(E.idx.get(t.id).q, 0)}</td><td>${r.dim}</td><td>${fmt(r.v, 2)}</td><td>${fmt(r.dpm, 2)}</td><td>${fmt(r.S, 1)}</td><td>${fmt(r.T, 1)}</td><td>${fmt(r.te, 1)}</td><td class="${r.al !== "OK" ? "w" : ""}">${r.al}</td></tr>`; });
+    for (let i = 0; i < all.length; i += 38) html += `<div class="page">${hdr()}<div class="sec">Anexo — tabela de trechos · Circuito ${esc(S.circ)}</div><table class="pt"><tr><th>#</th><th>Descrição</th><th>Mont.</th><th>Q (m³/h)</th><th>Dimensão</th><th>v (m/s)</th><th>Δp/m</th><th>Δp trecho</th><th>Acum. total</th><th>Acum. ext.</th><th>Estado</th></tr>${all.slice(i, i + 38).join("")}</table><div class="pf"><span>${esc(p.equipamento)}</span><span>Anexo</span></div></div>`;
+  }
+  host.innerHTML = html;
+  fitPage();
+}
+function fitPage() {
+  const host = $("#pageHost"), v = $("#v-resumo"); if (!host || !host.firstChild) return;
+  const avail = v.clientWidth - 20, pw = 297 / 25.4 * 96;
+  const s = Math.min(1, avail / pw);
+  host.style.transform = `scale(${s})`; host.style.width = pw + "px"; host.style.height = (host.scrollHeight * s) + "px";
+}
+
+/* ---------------- definições ---------------- */
+function tableEditor(rows, cols, opts = {}) {
+  const wrap = h("div", {});
+  const tb = h("table", { class: "t" }, h("tr", {}, cols.map((c) => h("th", {}, c.l)), opts.del !== false ? h("th", {}) : null));
+  rows.forEach((r, i) => {
+    const ed = opts.wrapRow ? opts.wrapRow(r) : r;
+    tb.append(h("tr", {}, cols.map((c) => h("td", { class: c.ro ? "l" : "" }, c.ro ? String(ed[c.k] ?? "") : c.sel ? inSel(ed, c.k, c.sel, { after: () => changed(false) }) : inText(ed, c.k, { num: c.num, nullable: c.nullable, after: () => changed(false) }))),
+      opts.del !== false ? h("td", {}, h("button", { class: "btn sm red", onclick: () => { rows.splice(i, 1); changed(false); renderDef(); } }, "✕")) : null));
+  });
+  wrap.append(tb);
+  if (opts.add) wrap.append(h("button", { class: "btn sm ghost", style: "margin-top:6px", onclick: () => { rows.push(opts.add()); changed(false); renderDef(); } }, "＋ Adicionar linha"));
+  return wrap;
+}
+function pctProxy(obj, key) { return new Proxy(obj, { get: (o, k) => (k === key ? Math.round(o[key] * 1e6) / 1e4 : o[k]), set: (o, k, v) => { o[k] = k === key ? v / 100 : v; return true; } }); }
+function renderDef() {
+  const el = $("#v-def"); el.innerHTML = ""; const d = S.data, p = d.projeto, pr = d.params;
+  const card = (title, ...kids) => { const c = h("div", { class: "card" }, h("h3", { style: "margin-top:0" }, title), ...kids); el.append(c); return c; };
+  const after = () => changed(false);
+  card("Projeto e equipamento", h("div", { class: "grid" }, [["requerente", "Requerente"], ["obra", "Obra"], ["local", "Local"], ["data", "Data"], ["equipamento", "Equipamento (ref.)"], ["modelo", "Modelo / fabricante"], ["zona", "Zona / serviço"], ["processo", "Processo n.º"], ["revisao", "Revisão"], ["autor", "Autor"]].map(([k, l]) => field(l, inText(p, k, { after })))));
+  card("Parâmetros de cálculo", h("div", { class: "grid" },
+    field("Tipo de espaço", inSel(pr, "espaco", d.criterios.map((c) => c.nome), { after })),
+    field("Método global", inSel(pr, "metodoGlobal", METODOS, { after })),
+    field("Arredondamento Ø", inSel(pr, "regraDiam", ["Por excesso", "Mais próximo"], { after })),
+    field("ρ (kg/m³)", inText(pr, "rho", { num: true, after })), field("ν (m²/s)", inText(pr, "visc", { num: true, after })),
+    field("Velocidade inicial tronco (m/s)", inText(pr, "vini", { num: true, after })), field("Velocidade mínima (m/s)", inText(pr, "vmin", { num: true, after })),
+    field("Fator de recuperação R", inText(pr, "recup", { num: true, after })), field("Acessórios no atrito (fração)", inText(pr, "pctAcc", { num: true, after })),
+    field("Fator da v limite", inText(pr, "fatorV", { num: true, after })), field("Rel. aspeto alvo", inText(pr, "kAlvo", { num: true, after })), field("Rel. aspeto máximo", inText(pr, "kMax", { num: true, after })),
+    field("Módulo dos lados (mm)", inText(pr, "modulo", { num: true, after })), field("Lado mínimo (mm)", inText(pr, "ladoMin", { num: true, after })),
+    field("Temperatura (°C)", inText(pr, "temp", { num: true, after: save })), field("Altitude (m)", inText(pr, "alt", { num: true, after: save }))),
+    h("div", { style: "margin-top:8px;display:flex;gap:8px;align-items:center;flex-wrap:wrap" }, h("button", { class: "btn sm ghost", onclick: () => {
+      const T = pr.temp + 273.15, rho = 101325 * Math.pow(1 - 2.25577e-5 * pr.alt, 5.25588) / (287.058 * T);
+      pr.rho = Math.round(rho * 1e4) / 1e4; pr.visc = Number((1.716e-5 * Math.pow(T / 273.15, 1.5) * (273.15 + 110.4) / (T + 110.4) / rho).toPrecision(4)); changed(false); renderDef();
+    } }, "Sugerir ρ e ν a partir de T e altitude"), h("span", { class: "hint" }, "Não corrige a perda de carga por altitude/temperatura além de ρ e ν.")));
+  card("Circuitos (ventilador)", tableEditor(d.circuitos, [{ k: "nome", l: "Nome" }, { k: "fugas", l: "Fugas (%)", num: true }, { k: "margem", l: "Margem pressão (%)", num: true }, { k: "rend", l: "Rendimento (0-1)", num: true }, { k: "dpAdic", l: "ΔP adicional (Pa)", num: true }, { k: "refIn", l: "Δp/m ref. (0 = derivar)", num: true }],
+    { wrapRow: (c) => pctProxy(pctProxy(c, "fugas"), "margem"), add: () => ({ nome: "Novo circuito", fugas: 0, margem: 0.1, rend: 0.6, dpAdic: 0, refIn: 0 }) }),
+    h("p", { class: "hint" }, "Nome de circuito: os trechos referem-se a ele pelo nome. Se renomear, atualize o circuito dos trechos."));
+  card("Peças rápidas (código do Catálogo)", h("div", { class: "grid" }, ["Curva 90°", "Curva 45°", "Tê / derivação", "Redução", "Registo"].map((l, i) => field(l, inSel(d.quick, i, d.catalogo.map((c) => ({ v: c.cod, l: `${c.cod} (C=${c.valor})` })), { after })))));
+  card("Derivações com caudais (opcional)", h("p", { class: "hint" }, "Preencher ≥ 2 linhas, com razões Qb/Qc CRESCENTES e sem linhas vazias, para ativar. C referido à pressão dinâmica do troço comum a montante (ASHRAE). Cada unidade de «Tês / derivações» num trecho com montante passa a usar esta tabela; vazia ⇒ usa o C fixo da peça rápida «Tê». Dados do fabricante ou da base ASHRAE Duct Fitting Database (nenhum valor é fornecido por defeito)."),
+    h("p", { class: "hint", id: "derState" }, ""), tableEditor(d.derivacoes, [{ k: "q", l: "Qb / Qc", num: true, nullable: true }, { k: "c", l: "C (ref. troço comum)", num: true, nullable: true }], { del: false }));
+  const ds = $("#derState"); if (ds) ds.textContent = E ? (E.derOn ? `ATIVA (${E.der.length} pontos)` : E.der.length ? "INVÁLIDA (razões não crescentes ou < 2 pontos)" : "vazia: C fixo") : "";
+  card("Catálogo de singularidades e equipamentos", h("p", { class: "hint" }, "Valores INDICATIVOS. Tipo C: perda = C·ρ/2·v². Tipo Pa: perda por unidade, escala com o caudal se indicar Q nominal: ΔP = Valor·(Q/Qnom)^n (n = 2 por defeito). Âmbito UTA entra na perda TOTAL mas não na EXTERNA."),
+    tableEditor(d.catalogo, [{ k: "cod", l: "Código" }, { k: "desc", l: "Descrição" }, { k: "tipo", l: "Tipo", sel: ["C", "Pa"] }, { k: "valor", l: "Valor", num: true }, { k: "qnom", l: "Q nom.", num: true }, { k: "exp", l: "n", num: true }, { k: "ambito", l: "Âmbito", sel: ["Rede", "UTA"] }], { add: () => ({ cod: "NOVO", desc: "", tipo: "C", valor: 0, nota: "", qnom: 0, exp: 0, ambito: "Rede" }) }));
+  card("Critérios de velocidade máxima (m/s)", tableEditor(d.criterios, [{ k: "nome", l: "Tipo de espaço" }, { k: "tronco", l: "Tronco", num: true }, { k: "ramal", l: "Ramal", num: true }, { k: "term", l: "Terminal", num: true }, { k: "nc", l: "NC" }], { del: false }));
+  card("Materiais (rugosidade ε, mm)", tableEditor(d.materiais, [{ k: "nome", l: "Material" }, { k: "eps", l: "ε (mm)", num: true }], { add: () => ({ nome: "Novo", eps: 0.15, nota: "" }) }));
+  const dm = h("input", { type: "text", value: d.diametros.join(", ") }); dm.addEventListener("change", () => { d.diametros = dm.value.split(/[,;\s]+/).map(Number).filter((x) => x > 0); changed(false); });
+  card("Diâmetros comerciais (mm)", field("Lista separada por vírgulas, ordem crescente", dm));
+}
+
+/* ---------------- ficheiros ---------------- */
+function download(name, text, type) { const a = h("a", { href: URL.createObjectURL(new Blob([text], { type })), download: name }); document.body.append(a); a.click(); a.remove(); }
+const CSVH = ["id", "descricao", "montante", "circuito", "categoria", "caudal_terminal", "comprimento", "material", "forma", "altura_fixa", "rel_aspeto", "metodo", "man_A", "man_B", "curvas90", "curvas45", "tes", "reducoes", "registos", "terminal"];
+const CSVK = ["id", "desc", "mont", "circ", "cat", "qterm", "len", "mat", "forma", "hfix", "kasp", "metodo", "manA", "manB", "n90", "n45", "nte", "nred", "nreg", "term"];
+function csvOut() {
+  const q = (v) => { v = v == null ? "" : typeof v === "number" ? String(v).replace(".", ",") : String(v); return /[;"\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; };
+  const lines = [CSVH.join(";")].concat(S.data.trechos.map((t) => CSVK.map((k) => q(t[k])).join(";")));
+  download("trechos_" + (S.data.projeto.equipamento || "rede").replace(/\W+/g, "_") + ".csv", "﻿" + lines.join("\r\n"), "text/csv");
+}
+function csvIn(text) {
+  text = text.replace(/^﻿/, ""); const sep = text.split("\n")[0].includes(";") ? ";" : ",";
+  const rows = []; let cur = [], f = "", inq = false;
+  for (let i = 0; i < text.length; i++) { const ch = text[i]; if (inq) { if (ch === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else inq = false; } else f += ch; } else if (ch === '"') inq = true; else if (ch === sep) { cur.push(f); f = ""; } else if (ch === "\n" || ch === "\r") { if (ch === "\r" && text[i + 1] === "\n") i++; cur.push(f); rows.push(cur); cur = []; f = ""; } else f += ch; }
+  if (f !== "" || cur.length) { cur.push(f); rows.push(cur); }
+  const head = rows.shift().map((x) => x.trim().toLowerCase());
+  const out = [];
+  rows.filter((r) => r.some((x) => x.trim() !== "")).forEach((r) => {
+    const t = newTrecho({}); t.pecas = [];
+    CSVH.forEach((hn, i) => { const j = head.indexOf(hn); if (j < 0) return; const k = CSVK[i], v = (r[j] || "").trim(); const num = ["id", "mont", "qterm", "len", "hfix", "kasp", "manA", "manB", "n90", "n45", "nte", "nred", "nreg"].includes(k); t[k] = num ? (parseNum(v) ?? 0) : v; });
+    if (!t.forma) t.forma = "Circular"; out.push(t);
+  });
+  if (!out.length) { alert("Nenhum trecho encontrado no CSV."); return; }
+  if (!confirm(`Substituir os ${S.data.trechos.length} trechos atuais por ${out.length} trechos importados?`)) return;
+  S.data.trechos = out;
+  const names = new Set(S.data.circuitos.map((c) => c.nome)); out.forEach((t) => { if (t.circ && !names.has(t.circ)) { S.data.circuitos.push({ nome: t.circ, fugas: 0, margem: 0.1, rend: 0.6, dpAdic: 0, refIn: 0 }); names.add(t.circ); } });
+  S.circ = out[0].circ || S.circ; S.sel = out[0].id; changed(true); renderHeader();
+}
+
+/* ---------------- vistas ---------------- */
+/* ---------------- capa / ficheiro ---------------- */
+function heroSVG() {
+  const duct = "#9fb7e0", dk = "#0f1f3c";
+  const dif = (x, y, up) => `<g transform="translate(${x},${y})${up ? "" : " scale(1,-1)"}"><path d="M-14 0 L14 0 L22 -9 L-22 -9 Z" fill="#fff" opacity=".9"/><rect x="-7" y="0" width="14" height="14" fill="${duct}"/></g>`;
+  const arr = (x, y) => `<path d="M${x} ${y - 6} L${x + 10} ${y} L${x} ${y + 6} Z" fill="#ED7D31"/>`;
+  return `<svg viewBox="0 0 900 300" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs><linearGradient id="hg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1F3864"/><stop offset="1" stop-color="#2d5aa8"/></linearGradient>
+  <pattern id="gp" width="30" height="30" patternUnits="userSpaceOnUse"><path d="M30 0H0V30" fill="none" stroke="#fff" stroke-opacity=".07"/></pattern></defs>
+  <rect width="900" height="300" fill="url(#hg)"/><rect width="900" height="300" fill="url(#gp)"/>
+  <rect x="0" y="238" width="900" height="62" fill="${dk}" opacity=".35"/>
+  <!-- UTA -->
+  <rect x="40" y="110" width="150" height="84" rx="6" fill="#e9eef8" stroke="#fff"/><rect x="46" y="116" width="46" height="72" fill="#c3d0ea"/><rect x="96" y="116" width="46" height="72" fill="#d8e2f4"/>
+  <circle cx="165" cy="152" r="20" fill="#fff" stroke="${dk}" stroke-width="2"/><path d="M165 152 l0 -16 M165 152 l14 8 M165 152 l-14 8" stroke="${dk}" stroke-width="3" stroke-linecap="round"/>
+  <text x="115" y="214" fill="#fff" font-size="13" text-anchor="middle" font-family="Arial">UTA</text>
+  <!-- tronco principal -->
+  <rect x="190" y="136" width="560" height="32" fill="${duct}"/><rect x="190" y="136" width="560" height="5" fill="#fff" opacity=".35"/>
+  <rect x="330" y="136" width="4" height="32" fill="${dk}" opacity=".35"/><rect x="520" y="136" width="4" height="32" fill="${dk}" opacity=".35"/>
+  <!-- ramais -->
+  <rect x="262" y="60" width="26" height="76" fill="${duct}"/><rect x="262" y="168" width="26" height="70" fill="${duct}"/>
+  <rect x="430" y="40" width="26" height="96" fill="${duct}"/><rect x="430" y="168" width="26" height="60" fill="${duct}"/>
+  <rect x="640" y="60" width="26" height="76" fill="${duct}"/><rect x="640" y="168" width="26" height="70" fill="${duct}"/>
+  <rect x="724" y="136" width="26" height="32" fill="${duct}"/>
+  ${dif(275, 60, true)}${dif(443, 40, true)}${dif(653, 60, true)}${dif(275, 238, false)}${dif(443, 228, false)}${dif(653, 238, false)}
+  <!-- redução e caudal -->
+  <path d="M750 136 L790 146 L790 158 L750 168 Z" fill="${duct}"/><rect x="790" y="146" width="70" height="12" fill="${duct}"/><rect x="858" y="140" width="10" height="24" fill="#fff"/>
+  ${arr(225, 152)}${arr(375, 152)}${arr(570, 152)}${arr(700, 152)}
+  <text x="40" y="270" fill="#fff" fill-opacity=".85" font-size="13" font-family="Arial">Ventilação · Climatização · Redes aeráulicas</text></svg>`;
+}
+function renderFicheiro() {
+  const el = $("#v-ficheiro"); el.innerHTML = ""; const p = S.data.projeto;
+  const after = () => { renderHeader(); save(); };
+  const mbtn = (txt, fn, cls) => h("button", { class: cls || "", onclick: fn }, txt);
+  const menu = h("div", { class: "cv-menu" }, h("h2", {}, "Ficheiro"),
+    mbtn("Abrir a rede  ▸", () => setView("rede"), "go"),
+    mbtn("Novo projeto (exemplo)", () => { if (confirm("Substituir o projeto atual pelo exemplo?")) { S.data = clone(window.DEFAULT_DATA); migrate(); S.circ = S.data.circuitos[0].nome; S.sel = 1; changed(true); renderFicheiro(); } }),
+    mbtn("Abrir projeto (.json)", () => { window.__fileMode("json"); $("#fileIn").accept = ".json,application/json"; $("#fileIn").click(); }),
+    mbtn("Guardar projeto (.json)", () => download((p.equipamento || "projeto").replace(/\W+/g, "_") + ".condutas.json", JSON.stringify(S.data, null, 1), "application/json")),
+    h("hr"),
+    mbtn("Exportar trechos (.csv)", () => csvOut()),
+    mbtn("Importar trechos (.csv)", () => { window.__fileMode("csv"); $("#fileIn").accept = ".csv,text/csv,text/plain"; $("#fileIn").click(); }),
+    h("hr"),
+    window.__pwaPrompt ? mbtn("Instalar no dispositivo", async () => { const e = window.__pwaPrompt; window.__pwaPrompt = null; e.prompt(); await e.userChoice; renderFicheiro(); }, "go") : null,
+    mbtn("Resumo A4 / PDF", () => setView("resumo")),
+    h("p", { class: "hint" }, "Os dados ficam guardados automaticamente neste dispositivo. Use «Guardar projeto» para cópias de segurança e para levar para o PC."));
+  const slot = h("div", { class: "logo-slot", title: "Inserir logotipo", onclick: () => $("#logoIn").click() }, p.logo ? h("img", { src: p.logo }) : h("span", {}, "Logotipo", h("br"), "toque para inserir"));
+  const logoBox = h("div", {}, slot, p.logo ? h("button", { class: "btn sm ghost", style: "margin-top:6px", onclick: () => { p.logo = ""; changed(false); renderFicheiro(); } }, "Remover logotipo") : null);
+  const tin = (k, cls, ph) => { const i = h("input", { type: "text", class: cls || "", value: p[k] || "", placeholder: ph || "" }); i.addEventListener("change", () => { p[k] = i.value; after(); }); return i; };
+  const body = h("div", { class: "cv-body" }, logoBox,
+    h("div", { class: "cv-title" }, tin("titulo", "", "Título da folha"), tin("obra", "sub", "Obra / subtítulo"),
+      h("div", { class: "cv-fields" }, field("Autor", inText(p, "autor", { after })), field("Versão / revisão", inText(p, "revisao", { after })), field("Data", inText(p, "data", { after })), field("Equipamento", inText(p, "equipamento", { after })), field("Modelo / fabricante", inText(p, "modelo", { after })), field("Requerente", inText(p, "requerente", { after })), field("Local", inText(p, "local", { after })), field("Zona / serviço", inText(p, "zona", { after })), field("Processo n.º", inText(p, "processo", { after })))));
+  el.append(h("div", { class: "cover" }, menu, h("div", { class: "cv-main" }, h("div", { class: "cv-hero", html: heroSVG() }), body)));
+}
+function setLogo(f) {
+  const rd = new FileReader();
+  rd.onload = () => { const im = new Image(); im.onload = () => { const m = 400, k = Math.min(1, m / Math.max(im.width, im.height)); const c = document.createElement("canvas"); c.width = Math.round(im.width * k); c.height = Math.round(im.height * k); c.getContext("2d").drawImage(im, 0, 0, c.width, c.height); S.data.projeto.logo = c.toDataURL("image/png"); changed(false); renderFicheiro(); }; im.src = rd.result; };
+  rd.readAsDataURL(f);
+}
+
+function renderView() { if (S.view === "ficheiro") renderFicheiro(); else if (S.view === "esquema") renderEsquema(); else if (S.view === "resumo") renderResumo(); else if (S.view === "def") renderDef(); }
+function setView(v) {
+  S.view = v; document.querySelectorAll(".view").forEach((e) => e.classList.remove("on")); $("#v-" + v).classList.add("on");
+  renderHeader(); document.querySelectorAll("header .ctl").forEach((e) => (e.style.display = v === "ficheiro" ? "none" : "")); if (v === "rede") { renderKpis(); renderTree(); renderEdit(); } else renderView();
+}
+function init() {
+  load(); recalc();
+  $("#selCirc").addEventListener("change", (e) => { S.circ = e.target.value; const o = ordered(); S.sel = o.length ? o[0].t.id : null; changed(true); });
+  $("#selMet").addEventListener("change", (e) => { S.data.params.metodoGlobal = e.target.value; changed(true); });
+  $("#btnPrint").onclick = () => window.print();
+  let mode = "json"; window.__fileMode = (m) => { mode = m; };
+  $("#fileIn").addEventListener("change", (e) => {
+    const f = e.target.files[0]; if (!f) return; const rd = new FileReader();
+    rd.onload = () => { try { if (mode === "json") { S.data = JSON.parse(rd.result); migrate(); S.circ = S.data.circuitos[0].nome; S.sel = S.data.trechos[0] && S.data.trechos[0].id; changed(true); renderHeader(); } else csvIn(rd.result); } catch (err) { alert("Ficheiro inválido: " + err.message); }  e.target.value = ""; };
+    rd.readAsText(f);
+  });
+  window.addEventListener("resize", () => { if (S.view === "resumo") fitPage(); });
+  window.addEventListener("beforeprint", () => { const h_ = $("#pageHost"); h_.dataset.t = h_.style.transform; });
+  $("#logoIn").addEventListener("change", (e) => { const f = e.target.files[0]; if (f) setLogo(f); e.target.value = ""; });
+  setView("ficheiro");
+}
+window.addEventListener("beforeinstallprompt", (e) => { e.preventDefault(); window.__pwaPrompt = e; if (S.view === "ficheiro") renderFicheiro(); });
+if ("serviceWorker" in navigator && /^https?:$/.test(location.protocol)) navigator.serviceWorker.register("sw.js").catch(() => {});
+init();
+window.__app = { S, get E() { return E; }, recalc, changed, setView };
+</script>
+</body>
+</html>
